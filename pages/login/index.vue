@@ -54,6 +54,7 @@
 import * as Api from '../../api/api'
 import {hex_md5} from "../../utils/md5";
 export default {
+  //middleware: 'auth',
   head() {
     return {
       titleTemplate: '幸运两小只-登录',
@@ -66,7 +67,7 @@ export default {
     }
   },
   name: "index.vue",
-  asyncData(){
+  asyncData({store}){
     return {
       loginInfo: {
         verifyCode: '',
@@ -74,8 +75,10 @@ export default {
       },
       captchaPath: '/user/captcha',
     }
+
   },
   mounted() {
+    this.checkLogin();
     this.updateVerifyCode();
     this.$store.commit("setCurrentActivityTab", "index");
   },
@@ -94,6 +97,12 @@ export default {
     }
   },
   methods:{
+    async checkLogin(){
+      let checkInfo = await Api.checkToken();
+      if (checkInfo.data.id !== this.currentUserId) {
+        location.href = '/'
+      }
+    },
     refreshQrCode(){
       this.getLoginQrCode();
     },
@@ -156,6 +165,7 @@ export default {
         center: true,
         type:'success'
       })
+
       //this.$router.push({path: '/'});
       //从地址中获取redirect
       let redirect = this.$route.query.redirect;

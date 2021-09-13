@@ -7,9 +7,9 @@
       <div class="info-content">
         <div class="user-info">
           <div class="el-row">
-            <div class="el-col el-col-4">
-              <img size="large" :src="userInfo.avatar" class="el-avatar" />
-              <div class="update-avatar-tips">
+            <div class="el-col el-col-4" @click="showAvatarDialog" >
+              <el-avatar size="large" :src="userInfo.avatar"></el-avatar>
+              <div  class="update-avatar-tips" >
                 修改头像
               </div>
             </div>
@@ -29,7 +29,19 @@
 
               <div class="sex">
                 <div class="value-text">
-                  <i class="el-icon-male" style="color: rgb(64, 158, 255);"></i>程序猿
+                  <div v-if="!isChangeInfo">
+                    <div v-if="userInfo.sex === '0'"><i class="el-icon-female" style="color: rgb(245, 108, 108);"></i>程序猿</div>
+                    <div v-else-if="userInfo.sex === '1'"><i class="el-icon-male" style="color: rgb(64, 158, 255);"></i>程序猿</div>
+                    <div v-else><i class="el-icon-key" style="color:rgb(230, 162, 60);"></i>程序员</div>
+                  </div>
+                  <div v-else>
+                    <el-select v-model="hewieUser.sex" placeholder="请选择" size="small">
+                      <el-option label="程序媛" value="0"></el-option>
+                      <el-option label="程序猿" value="1"></el-option>
+                      <el-option label="程序员" value="2"></el-option>
+                    </el-select>
+                  </div>
+
                 </div>
               </div>
             </div>
@@ -80,9 +92,9 @@
                 <div class="title el-icon-office-building">&nbsp;公司</div>
               </div>
               <div class="el-col el-col-14" >
-                <div v-if="!isChangeSkill">hang研</div>
+                <div class="info" v-if="!isChangeSkill" v-text="(userInfo.workspace === '' || userInfo.workspace === null) ? '地球村' : userInfo.workspace"></div>
                 <div v-else>
-                  <el-input type="text" placeholder="哪高就呢？" size="mini" style="max-width: 200px"></el-input>
+                  <el-input v-model="hewieUser.workspace" type="text" placeholder="哪高就呢？" size="mini" style="max-width: 200px"></el-input>
                 </div>
               </div>
               <div class="el-col el-col-6">
@@ -96,9 +108,9 @@
                 <div class="title el-icon-s-platform">&nbsp;职位</div>
               </div>
               <div class="el-col el-col-14">
-                <div v-if="!isChangeSkill">学生</div>
+                <div class="info" v-if="!isChangeSkill" v-text="(userInfo.position === '' || userInfo.position === null) ? '神农' : userInfo.position"></div>
                 <div v-else>
-                  <el-input type="text" placeholder="干啥的呀？" size="mini" style="max-width: 200px"></el-input>
+                  <el-input v-model="hewieUser.position" type="text" placeholder="干啥的呀？" size="mini" style="max-width: 200px"></el-input>
                 </div>
               </div>
               <div class="el-col el-col-6">
@@ -112,9 +124,9 @@
                 <div class="title el-icon-s-flag">&nbsp;擅长</div>
               </div>
               <div class="el-col el-col-14">
-                <div v-if="!isChangeSkill" v-text="(userInfo.sign === '' || userInfo.sign === null) ? '没有擅长领域' : userInfo.sign"></div>
+                <div class="info" v-if="!isChangeSkill" v-text="(userInfo.skills === '' || userInfo.skills === null) ? '没有擅长领域' : userInfo.skills"></div>
                 <div v-else>
-                  <el-input type="text" placeholder="java/c艹/AI...？" size="mini" style="max-width: 200px"></el-input>
+                  <el-input v-model="hewieUser.skills" type="text" placeholder="java/c艹/AI...？" size="mini" style="max-width: 200px"></el-input>
                 </div>
               </div>
               <div class="el-col el-col-6">
@@ -128,7 +140,7 @@
                 <div class="title el-icon-edit-outline">&nbsp;签名</div>
               </div>
               <div class="el-col el-col-14">
-                <div v-if="!isChangeSkill" v-text="(userInfo.sign === '' || userInfo.sign === null) ? '小手一抖，bug就来了' : userInfo.sign"></div>
+                <div class="info" v-if="!isChangeSkill" v-text="(userInfo.sign === '' || userInfo.sign === null) ? '小手一抖，bug就来了' : userInfo.sign"></div>
                 <div v-else>
                   <el-input v-model="hewieUser.sign" type="text" placeholder="专业写bug 20年..." size="mini" style="max-width: 500px" maxlength="60" show-word-limit></el-input>
                 </div>
@@ -143,13 +155,13 @@
           <div class="email-container">
             <div class="el-row">
               <div class="el-col el-col-4">
-                <div class="title el-icon-s-promotion">&nbsp;邮箱</div>
+                <div  class="title el-icon-s-promotion">&nbsp;邮箱</div>
               </div>
               <div class="el-col el-col-14">
-                <div>{{userInfo.email}}</div>
+                <div class="info">{{userInfo.email}}</div>
               </div>
               <div class="el-col el-col-6">
-                <button type="button" class="el-button modify-info-btn el-button--primary el-button--small is-plain">
+                <button @click="modifyEmailBtn" type="button" class="el-button modify-info-btn el-button--primary el-button--small is-plain">
                   <span>设置邮箱</span>
                 </button>
               </div>
@@ -158,11 +170,55 @@
         </div>
       </div>
     </div>
+
+    <div>
+      <el-dialog
+        :close-on-press-escape="false"
+        :close-on-click-modal="false"
+        title="更新邮箱"
+        :visible.sync="modifyEmailDialogShow"
+        width="500px">
+        <el-form label-width="100px" size="small">
+          <el-form-item label="人类验证码">
+            <el-input style="max-width: 200px" v-model="captchaCode" placeholder="请输入右侧验证码"></el-input>
+            <img
+              :src="captchaPath"
+              @click="updateVerifyCode"
+              class="captcha-code"/>
+          </el-form-item>
+          <el-form-item label="新邮箱地址">
+            <el-input style="max-width: 200px" v-model="newEmail"></el-input>
+            <el-button style="margin-left: 10px" v-if="!isCountingDown" type="primary" @click="getVerifyCode" class="email-get-verify-code-btn">获取验证码</el-button>
+            <el-button style="margin-left: 10px" v-else type="primary" class="email-get-verify-code-btn" disabled>{{ getVerifyCodeBtnText }}</el-button>
+          </el-form-item>
+
+          <el-form-item label="验证码">
+            <el-input style="max-width: 200px" v-model="verifyCode" class="email-verify-code-input"></el-input>
+          </el-form-item>
+
+          <el-form-item>
+            <el-button type="primary" @click="updateEmailAddr">更新邮箱</el-button>
+          </el-form-item>
+        </el-form>
+      </el-dialog>
+
+
+      <avatarUpload field="file"
+                     @crop-upload-success="cropUploadSuccess"
+                     @crop-upload-fail="cropUploadFail"
+                     v-model="showAvatarCutter"
+                     :width="300"
+                     :height="300"
+                     url="/admin/image/avatar"
+                     img-format="png">
+      </avatarUpload>
+    </div>
   </div>
 </template>
 
 <script>
 import * as Api from '../../api/api'
+
 export default {
 
   async asyncData(context) {
@@ -170,27 +226,65 @@ export default {
     let userInfoRes = await Api.getUserInfo(userId);
     return {
       userInfo: userInfoRes.data,
-      currentUserId:userId
+      currentUserId:userId,
+      captchaPath: '/user/captcha',
     }
   },
   data(){
     return{
+      modifyEmailDialogShow:false,
       isChangeSkill: false,
       isChangeInfo:false,
       hewieUser:{
         id:'',
         userName:'',
-        sign:''
+        sign:'',
+        sex: '',
+        workspace:'',
+        position:'',
+        skills:'',
+        avatar:''
       },
+      newEmail:'',
+      verifyCode:'',
+      getVerifyCodeBtnText:'重新发送（60）',
+      isCountingDown: false,
+      captchaCode:'',
+      showAvatarCutter: false,
     }
   },
   mounted() {
     this.checkLogin();
+    this.updateVerifyCode();
   },
   methods:{
+    cropUploadSuccess( response ) {
+      this.hewieUser.id = this.currentUserId;
+      if (response.code === Api.success_code) {
+        this.userInfo.avatar = '/portal/image/' + response.data.id;
+        this.hewieUser.avatar = '/portal/image/' + response.data.id;
+        this.$message.success(response.message)
+        Api.updateUserInfo(this.hewieUser, this.hewieUser.id).then(result => {
+          if (result.code === Api.success_code) {
+            this.getUserInfo();
+            this.$message.success(result.message);
+          }else {
+            this.$message.error(result.message);
+          }
+        })
+      } else {
+        this.$message.error(response.message)
+      }
+    },
+    cropUploadFail() {
+      this.$message.error("上传失败");
+    },
+    showAvatarDialog(){
+      this.showAvatarCutter = true;
+    },
     async checkLogin(){
       let checkInfo = await Api.checkToken();
-      console.log(checkInfo)
+      //console.log(checkInfo)
       if (checkInfo.code === 4002) {
         location.href = '/login'
       }
@@ -219,16 +313,17 @@ export default {
     },
     async doSubmitChangeInfo(){
       this.hewieUser.id = this.currentUserId;
-      if (this.hewieUser.userName === '') {
-        this.$message.error('请输入独一无二的花名');
-        return;
-      }
+      // if (this.hewieUser.userName === '') {
+      //   this.$message.error('请输入独一无二的花名');
+      //   return;
+      // }
 
       let checkUserNameRes =  await Api.checkUserName(this.hewieUser.userName);
       if (checkUserNameRes.code === Api.success_code) {
         this.$message.error(checkUserNameRes.message);
         return;
       }
+      console.log(this.hewieUser.sex)
       //console.log(this.hewieUser)
       Api.updateUserInfo(this.hewieUser, this.currentUserId).then(result=>{
         if (result.code === Api.success_code) {
@@ -251,6 +346,77 @@ export default {
           this.$message.error(result.message);
         }
       })
+    },
+    modifyEmailBtn(){
+      this.modifyEmailDialogShow = true;
+    },
+    getVerifyCode() {
+
+      if (this.captchaCode === '') {
+        this.$message.error('请输入人类验证码');
+        return;
+      }
+
+      //1、校验邮箱格式
+      let reg = /\w[-\w.+]*@([A-Za-z0-9][-A-Za-z0-9]+\.)+[A-Za-z]{2,14}/
+      if (!reg.test(this.newEmail)) {
+        this.$message.error('邮箱格式不正确');
+        return
+      }
+      //this.$message.success('邮箱格式正确');
+      //2、禁止按钮，开始倒计时
+      console.log(this.newEmail)
+      //3、发起请求
+      Api.getVerifyCode(this.newEmail, 'update', this.captchaCode).then(result => {
+        if (result.code === Api.success_code) {
+          this.startCountDown();
+          this.$message.success(result.message);
+        } else  {
+          this.$message.error(result.message);
+        }
+      });
+    },
+    startCountDown() {
+      let time = 60;
+      this.isCountingDown = true;
+      this.getVerifyCodeBtnText = '重新发送（60）';
+      let that = this;
+      let interval = setInterval(function (){
+        time--;
+        if (time <= 0) {
+          that.isCountingDown = false;
+
+          clearInterval(interval);
+        }
+        that.getVerifyCodeBtnText = '重新发送（' + time + '）';
+      },1000);
+    },
+    updateEmailAddr(){
+      if (this.newEmail === '') {
+        this.$message.error('邮箱地址不能为空');
+        return;
+      }
+      if (this.verifyCode === '') {
+        this.$message.error('验证码不能为空');
+        return;
+      }
+      Api.updateEmailAddr(this.newEmail, this.verifyCode).then(result => {
+        if (result.code === Api.success_code) {
+          this.$message.success(result.message);
+          this.verifyCode = '';
+          this.newEmail = '';
+          this.modifyEmailDialogShow = false;
+          this.captchaCode = '';
+          this.getUserInfo();
+        } else {
+          this.$message.error(result.message);
+          this.verifyCode = '';
+        }
+      })
+    },
+    updateVerifyCode() {
+      this.captchaPath = '/user/captcha?random = ' + Date.parse(new Date());
+      //console.log(this.captchaPath);
     },
   }
 }
@@ -278,6 +444,10 @@ export default {
 .info-content{
   margin-top: 30px;
   margin-bottom: 30px;
+}
+.info-content .info{
+  font-size: 14px;
+  color: #595959;
 }
 .info-content .user-info .el-avatar{
   width: 100px;

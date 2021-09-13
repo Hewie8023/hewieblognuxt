@@ -35,6 +35,14 @@ export default {
     {
       src:'@/plugins/word-cloud',
       ssr:false
+    },
+    {
+      src:'@/plugins/image-crop',
+      ssr:false
+    },
+    {
+      src: '@/plugins/vue-mavon-editor',
+      ssr: false
     }
   ],
 
@@ -55,6 +63,9 @@ export default {
       target: 'http://localhost:2020',
     },
     '/user/':{
+      target: 'http://localhost:2020',
+    },
+    '/admin/':{
       target: 'http://localhost:2020',
     }
   },

@@ -86,7 +86,7 @@
           placement="left"
           width="200"
           trigger="hover">
-          <el-image fit="cover" src="http://mp.lucky-dogs.top/portal/image/1631198735305_885657217238302720.jpeg" ></el-image>
+          <el-image fit="cover" src="https://mp.lucky-dogs.top/portal/image/1631198735305_885657217238302720.jpeg" ></el-image>
           <i slot="reference" class="hewieblog hewiewechat"></i>
         </el-popover>
       </div>
@@ -127,6 +127,7 @@ export default {
   beforeDestroy() {
     window.removeEventListener("scroll", this.onWindowScroll);
   },
+
   methods:{
 
     toTop(){
@@ -171,6 +172,7 @@ export default {
           this.userInfo = result.data;
           //通过状态树来共享id信息
           this.$store.commit("setCurrentUserId", this.userInfo.id);
+
           //console.log(this.userInfo)
           if (loginSuccess) {
             loginSuccess.style.display = 'block';

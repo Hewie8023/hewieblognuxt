@@ -119,7 +119,7 @@
           <div class="user-info-content" v-if="loginUserInfo !== ''">
             <div class="user-info-back" style="height: 50px; background: rgb(0, 132, 255);"></div>
             <div>
-              <div class="user-avatar">
+              <div class="user-avatar" @click="goUserInfoPage" style="cursor: pointer">
                 <img :src="loginUserInfo.avatar" style="object-fit: cover;">
               </div>
               <div class="user-name">
@@ -128,6 +128,7 @@
               <div class="user-sign">
                 <span v-text="loginUserInfo.sign"></span>
               </div>
+              <el-button @click="postArticle" class="post-article-btn" type="primary" size="mini">发表文章</el-button>
             </div>
           </div>
           <div class="no-login" v-else>
@@ -150,7 +151,6 @@
 
 <script>
 import * as Api from '../api/api'
-
 export default {
   head() {
     return {
@@ -170,7 +170,8 @@ export default {
       loginUserInfo:'',
     }
   },
-  async asyncData({ params }) {
+  async asyncData(context) {
+
     let userInfoRes = await Api.getUserInfo("868509148860383233");
     let categoriesRes = await Api.getCategories();
     let loopsRes = await Api.getloops();
@@ -197,6 +198,12 @@ export default {
     }
   },
   methods:{
+    goUserInfoPage(){
+      location.href = '/u/' + this.loginUserInfo.id
+    },
+    postArticle(){
+      location.href="/post"
+    },
     doLogin(){
       location.href="/login"
     },
@@ -300,16 +307,16 @@ export default {
       Api.checkToken().then(result=>{
         if (result.code === Api.success_code) {
           this.loginUserInfo = result.data;
-          console.log("userInfo===>"+this.loginUserInfo)
+          //console.log("userInfo===>"+this.loginUserInfo)
         }else {
-          console.log("userInfo=00==>"+this.loginUserInfo)
+          //console.log("userInfo=00==>"+this.loginUserInfo)
         }
       })
     },
   },
   mounted() {
     this.checkToken();
-    console.log("loginUserInfo"+this.loginUserInfo)
+    //console.log("loginUserInfo"+this.loginUserInfo)
     this.$store.commit("setCurrentActivityTab", "index");
     this.listLabels();
     window.addEventListener('scroll', this.onWindowScroll);
@@ -620,6 +627,11 @@ export default {
     margin-top: 10px;
     color: #7f828b;
     font-size: 14px;
+    margin-bottom: 20px;
+  }
+
+  .user-info-content .post-article-btn{
+    width: 220px;
     margin-bottom: 20px;
   }
 

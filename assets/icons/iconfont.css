@@ -1,11 +1,11 @@
 @font-face {
   font-family: "hewieblog"; /* Project id 2775366 */
-  src: url('iconfont.eot?t=1630341858704'); /* IE9 */
-  src: url('iconfont.eot?t=1630341858704#iefix') format('embedded-opentype'), /* IE6-IE8 */
-       url('iconfont.woff2?t=1630341858704') format('woff2'),
-       url('iconfont.woff?t=1630341858704') format('woff'),
-       url('iconfont.ttf?t=1630341858704') format('truetype'),
-       url('iconfont.svg?t=1630341858704#hewieblog') format('svg');
+  src: url('iconfont.eot?t=1631349259184'); /* IE9 */
+  src: url('iconfont.eot?t=1631349259184#iefix') format('embedded-opentype'), /* IE6-IE8 */
+       url('iconfont.woff2?t=1631349259184') format('woff2'),
+       url('iconfont.woff?t=1631349259184') format('woff'),
+       url('iconfont.ttf?t=1631349259184') format('truetype'),
+       url('iconfont.svg?t=1631349259184#hewieblog') format('svg');
 }
 
 .hewieblog {
@@ -14,6 +14,14 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.fensi1:before {
+  content: "\e651";
+}
+
+.guanzhu:before {
+  content: "\e612";
 }
 
 .hewietop001:before {

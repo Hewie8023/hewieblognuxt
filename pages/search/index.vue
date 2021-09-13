@@ -88,6 +88,7 @@
 <script>
 import * as Api from '../../api/api'
   export default {
+    //middleware: 'checkLogin',
     head() {
       return {
         titleTemplate: '幸运两小只-搜索',

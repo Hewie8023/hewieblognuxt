@@ -2,6 +2,7 @@ import http from './http'
 import ca from "element-ui/src/locale/lang/ca";
 
 const baseUrl = 'http://localhost:2020'
+//const baseUrl = 'http://172.25.172.52:2020'
 export const success_code = 2000
 
 export const getUserInfo = (userId) =>{
@@ -77,7 +78,11 @@ export const doLogin = (verifyCode, from, hewieUser) => {
   return http.requestPost('/user/login/' + verifyCode  + '?from=' + from, hewieUser);
 }
 export const checkToken = () => {
-  return http.requestGet('/user/check-token');
+  if (process.client) {
+    return http.requestGet('/user/check-token');
+  } else {
+    return http.requestGet(baseUrl + '/user/check-token');
+  }
 }
 export const doLogout = () => {
   return http.requestGet('/user/logout');
@@ -123,3 +128,39 @@ export const postComment = (comment) => {
 export const updateUserInfo = (userInfo, userId) => {
   return http.requestPut('/user/user_info/' +　userId, userInfo);
 }
+
+//获取邮箱验证码
+export const getVerifyCode = (newEmail, type, captchaCode) => {
+  return http.requestGet('/user/verify_code/?email=' + newEmail + '&type=' + type + '&captchaCode=' + captchaCode);
+}
+//更新邮箱
+export const updateEmailAddr = (newEmail, verifyCode) => {
+  return http.requestPut('/user/email?email=' + newEmail + '&verify_code=' + verifyCode);
+}
+
+export const getArticleList = (userId, page, size) => {
+  return http.requestGet('/portal/article/list/byUid/' + userId + '/' + page + '/' + size);
+
+}
+
+export const listImages = (page, size, original) => {
+  return http.requestGet('/admin/image/list/' + page + '/' + size + '?original=' + original);
+}
+
+export const saveArticleDraft = (article) => {
+  return http.requestPost('/admin/article', article);
+}
+export const postArticle = (article) => {
+  return http.requestPost('/admin/article', article);
+}
+export const getArticleDetail = (articleId) => {
+  return http.requestGet('/admin/article/' + articleId);
+}
+export const updateArticle = (article, articleId) => {
+  return http.requestPut('/admin/article/' + articleId, article);
+}
+export const deleteArticlePretend = (articleId) => {
+  return http.requestDelete('/admin/article/state/' + articleId);
+}
+
+
