@@ -444,4 +444,15 @@ export default {
     color: #93999f;
   }
 
+html::-webkit-scrollbar {
+  width: 8px;
+  height: 6px;
+}
+html::-webkit-scrollbar-thumb {
+  border-radius: 4px;
+  background-color: #cbcbcb;
+}
+html::-webkit-scrollbar-track-piece {
+  background: #eee;
+}
 </style>

@@ -30,7 +30,7 @@
             <div class="main-list-item" v-for="(item,index) in topArticles" :key="'top-'+index">
               <div class="top-article-item clear-fix" >
                 <div class="img-container" >
-                  <img :src="'/portal/image/'+ item.cover" class="el-image" style="width: 120px; border-radius: 4px; height: 80px; background: rgb(240, 240, 240); object-fit: cover;"/>
+                  <img :src="'/portal/image/'+ item.cover" class="el-image" style="width: 140px; border-radius: 4px; height: 100px; background: rgb(240, 240, 240); object-fit: cover;"/>
                 </div>
                 <div class="right-side">
                   <div class="title">
@@ -38,24 +38,23 @@
                       <a :href="'/article/'+item.id" target="_blank">{{item.title}}</a>
                       <i class="hewieblog hewietop01 top"></i>
                     </div>
-                    <div class="float-right" style="display: inline-block">
-                      <span class="labels-item el-tag el-tag--mini el-tag--light float-right" v-for="(subItem,subIndex) in item.labelList" :key="'top-label-' + subIndex">
-                        <a :href="'/search?keyword=' + subItem" target="_blank">
-                          {{ subItem }}
-                        </a>
-                      </span>
-                    </div>
+<!--                    <div class="float-right" style="display: inline-block">-->
+<!--                      <span class="labels-item el-tag el-tag&#45;&#45;mini el-tag&#45;&#45;light float-right" v-for="(subItem,subIndex) in item.labelList" :key="'top-label-' + subIndex">-->
+<!--                        <a :href="'/search?keyword=' + subItem" target="_blank">-->
+<!--                          {{ subItem }}-->
+<!--                        </a>-->
+<!--                      </span>-->
+<!--                    </div>-->
 
                   </div>
                   <div class="item-info">
-                    <el-tag style="cursor: pointer" type="success">{{item.category.name}}</el-tag>
+<!--                    <el-tag style="cursor: pointer" type="success">{{item.category.name}}</el-tag>-->
+
                     <a target="_blank" :href="'/u/'+item.hewieUserNoPassword.id" :title="item.hewieUserNoPassword.userName">
                         <img :src="item.hewieUserNoPassword.avatar" style="width: 20px; height: 20px; border-radius: 50%; margin-bottom: -5px; margin-left: 5px; margin-right: 2px;">
-                      <el-tooltip size="small" class="item" effect="dark" :content="item.hewieUserNoPassword.userName" placement="top-end">
                       <span class="vip-red-name content-item-username">
                           {{ item.hewieUserNoPassword.userName }}
                         </span>
-                      </el-tooltip>
                     </a>
                     <span>  ·  </span>
                     <span>{{item.updateTime | formatDate('yyyy-MM-dd hh:mm')}}</span>
@@ -63,38 +62,50 @@
                     <i class="el-icon-view"></i>
                     <span>{{ item.viewCount }}</span>
                   </div>
+                  <div class="item-info">
+                    <span class="labels-item el-tag el-tag--mini el-tag--light float-left" v-for="(subItem,subIndex) in item.labelList" :key="'top-label-' + subIndex">
+                      <a :href="'/search?keyword=' + subItem" target="_blank">
+                        {{ subItem }}
+                      </a>
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
             <div class="main-list-item" v-for="(item,index) in articles.contents" :key="'article-'+index">
               <div class="one-img-container clear-fix">
                 <div class="img-container">
-                  <img :src="'/portal/image/'+ item.cover" class="el-image" style="width: 120px; border-radius: 4px; height: 80px; background: rgb(240, 240, 240); object-fit: cover;"/>
+                  <img :src="'/portal/image/'+ item.cover" class="el-image" style="width: 140px; border-radius: 4px; height: 100px; background: rgb(240, 240, 240); object-fit: cover;"/>
                 </div>
                 <div class="right-side">
                   <div class="title">
                     <a :href="'/article/'+item.id" target="_blank">{{item.title}}</a>
-                    <span class="labels-item el-tag el-tag--mini el-tag--light float-right" v-for="(subItem,subIndex) in item.labelList" :key="'article-label-'+subIndex">
+<!--                    <span class="labels-item el-tag el-tag&#45;&#45;mini el-tag&#45;&#45;light float-right" v-for="(subItem,subIndex) in item.labelList" :key="'article-label-'+subIndex">
                         <a :href="'/search?keyword=' + subItem" target="_blank">
                           {{ subItem }}
                         </a>
-                      </span>
+                      </span>-->
                   </div>
                   <div class="item-info">
-                    <el-tag style="cursor: pointer" type="success">{{item.category.name}}</el-tag>
+<!--                    <el-tag style="cursor: pointer" type="success">{{item.category.name}}</el-tag>-->
                     <a target="_blank" :href="'/u/'+item.hewieUserNoPassword.id" :title="item.hewieUserNoPassword.userName">
                       <img :src="item.hewieUserNoPassword.avatar" style="width: 20px; height: 20px; border-radius: 50%; margin-bottom: -5px; margin-left: 5px; margin-right: 2px;">
-                      <el-tooltip size="small" class="item" effect="dark" :content="item.hewieUserNoPassword.userName" placement="top-end">
                         <span class="vip-red-name content-item-username">
                             {{ item.hewieUserNoPassword.userName }}
                           </span>
-                      </el-tooltip>
                     </a>
                     <span>·</span>
                     <span >{{item.updateTime | formatDate('yyyy-MM-dd hh:mm')}}</span>
                     <span>·</span>
                     <i class="el-icon-view"></i>
                     <span>{{ item.viewCount }}</span>
+                  </div>
+                  <div class="item-info">
+                      <span class="labels-item el-tag el-tag--mini el-tag--light float-left" v-for="(subItem,subIndex) in item.labelList" :key="'article-label-' + subIndex">
+                        <a :href="'/search?keyword=' + subItem" target="_blank">
+                          {{ subItem }}
+                        </a>
+                      </span>
                   </div>
                 </div>
               </div>
@@ -373,6 +384,11 @@ export default {
   color: #37f !important;
 }
 
+.main-list-item .labels-item{
+  margin-top: 15px;
+  margin-right: 10px;
+  background: #f3f2f4;
+}
 .main-list-item .labels-item a{
   color: #a1a1a2 !important;
   font-size: 12px !important;
@@ -520,7 +536,7 @@ export default {
     margin-bottom: 20px;
   }
   .main-list-item {
-    margin-top: 10px;
+    margin-top: 5px;
     padding-top: 10px;
     padding-bottom: 10px;
     margin-bottom: 10px;
@@ -542,7 +558,7 @@ export default {
   .one-img-container .right-side , .top-article-item .right-side{
     float: left;
     margin-left: 20px;
-    width: 480px;
+    width: 450px;
   }
 
   .top-article-item .right-side .title .top{
@@ -554,8 +570,7 @@ export default {
 
   .one-img-container .right-side .title, .top-article-item .right-side .title {
     max-width: 480px;
-    margin-top: 5px;
-    margin-bottom: 16px;
+    margin-bottom: 8px;
     margin-right: 20px;
 
     overflow: hidden;

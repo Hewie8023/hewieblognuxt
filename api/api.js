@@ -2,7 +2,7 @@ import http from './http'
 import ca from "element-ui/src/locale/lang/ca";
 
 const baseUrl = 'http://localhost:2020'
-//const baseUrl = 'http://172.25.172.52:2020'
+//const baseUrl = 'http://172.25.9.123:2020'
 export const success_code = 2000
 
 export const getUserInfo = (userId) =>{

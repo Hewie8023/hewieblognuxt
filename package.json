@@ -17,6 +17,7 @@
     "highlight.js": "^11.2.0",
     "nuxt": "^2.15.7",
     "prismjs": "^1.24.1",
+    "vue-clipboard2": "^0.3.2",
     "vue-image-crop-upload": "^3.0.3",
     "vue-wordcloud": "^1.1.1"
   }

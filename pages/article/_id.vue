@@ -1,10 +1,21 @@
 <template>
   <div id="article-main-box">
     <div id="article-box" class="index-page-box clear-fix">
+      <div class="article-action-part float-left">
+        <div class="action-item hewieblog hewiedianzan">
+        </div>
+        <div class="action-item hewieblog hewieshoucang"></div>
+        <div class="action-item hewieblog hewiefenxiang2"  @click="getArticleUrl"></div>
+        <div style="display: none" ><el-input id="input" v-model="artileUrl"></el-input></div>
+        <div class="action-item hewieblog hewiepinglun" @click="goToCommentBox"></div>
+      </div>
       <div class="article-left-part float-left">
         <div class="article-content-box">
           <div class="article-title">
             <span v-text="article.title"></span>
+          </div>
+          <div class="article-cover">
+            <img :src="'/portal/image/'+article.cover">
           </div>
           <div class="article-info">
             <img :src="article.hewieUserNoPassword.avatar"  style="object-fit:cover;"/>
@@ -40,7 +51,7 @@
           <div class="right-show-text">
             <span class="el-icon-warning-outline"></span>
             本文由
-            <a :href="'/user/'+article.userId" target="_blank" class="right-article-name">{{article.hewieUserNoPassword.userName}}</a>
+            <a :href="'/u/'+article.userId" target="_blank" class="right-article-name">{{article.hewieUserNoPassword.userName}}</a>
             原创发布于
             <a href="/" target="_blank">幸运两小只</a>
             ，未经作者授权，禁止转载
@@ -51,7 +62,7 @@
           <div class="article-comment-input" id="article-comment-input">
             <div class="comment-part-title">评论</div>
             <div class="comment-input clear-fix">
-              <div class="float-left">
+              <div class="float-left" style="display: inline-block">
                 <img v-if="userInfo !== null" :src="userInfo.avatar" class="comment-user-avatar"/>
                 <img v-else class="comment-user-avatar" src="https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png"/>
               </div>
@@ -84,6 +95,7 @@
                   </a>
                   <el-tag v-if="item.firstcomment.state === '2'" size="mini" type="danger">置顶</el-tag>
                 </div>
+
                 <div class="comment-content-detail">
                   <div class="article-comment-content">
                     {{item.firstcomment.content}}
@@ -108,7 +120,8 @@
                         </div>
                         <div class="clear-fix">
                           <span class="sub-publish-time ">{{subItem.createTime | formatDate('yyyy-MM-dd hh:mm')}}</span>
-                          <span class="sub-reply-text  el-icon-chat-round" @click="onReplayClick(index, subItem.fromUid, subItem.fromUname)"> 回复</span></div>
+                          <span class="sub-reply-text  el-icon-chat-round" @click="onReplayClick(index, subItem.fromUid, subItem.fromUname)"> 回复</span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -184,7 +197,7 @@
               <div class="article-user-name">
                 <a :href="'/u/'+article.userId" target="_blank">{{article.hewieUserNoPassword.userName}}</a>
               </div>
-              <div class="article-company"><span>无业游民</span>@<span>地球村</span></div>
+              <div class="article-company"><span>{{article.hewieUserNoPassword.position}}</span>@<span>{{article.hewieUserNoPassword.workspace}}</span></div>
             </div>
           </div>
         </div>
@@ -211,9 +224,12 @@
 <script>
 import * as Api from "../../api/api";
 import hljs from 'highlight.js';
-import 'highlight.js/styles/idea.css';
+import 'highlight.js/styles/lioshi.css';
 import Catelog  from '../../utils/headerLineHandler'
 let lastInputBox = null;
+import Vue from 'vue'
+import VueClipboard from 'vue-clipboard2'
+Vue.use(VueClipboard)
 export default {
   head() {
     return {
@@ -228,6 +244,7 @@ export default {
   },
   data(){
     return {
+      artileUrl:'',
       isImageDialogShow:false,
       targetImagePath:'',
       userInfo:null,
@@ -248,7 +265,9 @@ export default {
       pageSize:5,
       subCommentPlaceholder:'回复 ',
       isArticleProcessing:true,
-      toUid:''
+      toUid:'',
+      isCopy: false,
+
     }
   },
   async asyncData({params}){
@@ -287,20 +306,28 @@ export default {
     let timer = setInterval(function (){
       that.isArticleProcessing = false;
       clearInterval(timer)
-    },1000);
+    },500);
+
+    let e = document.querySelectorAll("code");
+
+    let eLen = e.length;
+    let i;
+    for (i = 0; i < eLen; i++) {
+      if (e[i].classList.contains("hljs")) {
+        e[i].innerHTML = "<ul><li>" + e[i].innerHTML.replace(/\n/g, "\n</li><li>") + "\n</li></ul>";
+      }
+    }
   },
   beforeDestroy() {
     window.removeEventListener('scroll', this.onWindowScroll);
   },
   methods:{
     scrollInToComment(){
-      let commentInputBox = document.getElementById('article-comment-input');
-      if (commentInputBox) {
-        commentInputBox.scrollIntoView({
-          block: "start",
-          behavior:"smooth"
-        })
-      }
+      let commentBox = document.getElementById("article-comment-input");
+      document.documentElement.scrollTo({
+        top: commentBox.offsetTop,
+        behavior: "smooth"
+      })
     },
     doSubComment(commentId){
 
@@ -453,6 +480,24 @@ export default {
         }
       }
     },
+    goToCommentBox(){
+      let commentBox = document.getElementById("article-comment-input");
+      document.documentElement.scrollTo({
+        top: commentBox.offsetTop,
+        behavior: "smooth"
+      })
+    },
+    getArticleUrl(){
+      this.artileUrl = location.href;
+      this.$copyText(this.artileUrl).then(function (e) {
+        //alert('Copied')
+        this.isCopy = true;
+      }, function (e) {
+        //alert('Can not copy')
+        this.isCopy = false;
+      });
+      this.$message.success('分享链接复制成功')
+    }
   }
 
 }
@@ -586,14 +631,19 @@ export default {
 .article-sub-comment-box{
   margin-top: 10px;
 }
+.sub-comment-input .el-textarea{
+  width: 500px !important;
+}
 .sub-comment-input {
   width: 600px;
   margin-right: 20px;
 }
-
 .sub-comment-btn{
   margin-top: 5px;
+  margin-left: 40px;
+  margin-right: 0px;
 }
+
 
 .load-more-comment:hover,.no-more-comment:hover{
   color: #3377ff;
@@ -733,7 +783,7 @@ export default {
   margin-right: 10px;
 }
 .comment-input-box{
-  width: 710px;
+  width: 680px;
 }
 .comment-input{
   display: inline-block;
@@ -809,8 +859,28 @@ export default {
   margin-bottom: 20px;
 
 }
+
+.article-action-part .action-item:hover {
+  color: #3377ff;
+}
+.article-action-part .action-item{
+  font-size: 24px;
+  font-weight: 600;
+  color: #93999f;
+  margin: 30px 5px;
+  cursor: pointer;
+
+}
+.article-action-part{
+  position: fixed;
+  top: 100px;
+  width: 20px;
+  margin-right: 20px;
+}
+
 .article-left-part{
-  width: 820px;
+  width: 780px;
+  margin-left: 40px;
   margin-right: 20px;
 }
 
@@ -908,11 +978,23 @@ export default {
   font-size: 14px;
 }
 .article-content img{
-  max-width: 780px;
+  max-width: 740px;
   padding: 10px 0;
   cursor: zoom-in;
 }
-
+.article-cover {
+  overflow: hidden;
+  margin-bottom: 20px;
+  margin-top: 20px;
+  line-height: 40px;
+}
+.article-cover img {
+   -o-object-fit: cover;
+   object-fit: cover;
+   width: 100%;
+   max-height: 200px;
+   border-radius: 4px;
+ }
 .article-content p{
   padding: 10px 0;
   display: block;
@@ -922,31 +1004,93 @@ export default {
   margin-inline-end: 0px;
 }
 .article-content h1{
-  color: #93999f;
-  line-height: 40px;
-  padding: 12px 0;
+  font-size: 1.75rem;
+  margin: 2.5rem 0 1rem;
+  padding-bottom: 1.75rem;
+  border-bottom: 1px double rgba(0,0,0,.1);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
 }
 
-.article-content h2{
-  color: #93999f;
-  line-height: 36px;
-  padding: 12px 0;
+.article-content h2 {
+  font-size: 1.55rem;
+  margin: 15px -20px;
+  padding: 0 25px;
+  border-left: 5px solid #0084ff;
+  background-color: #f7f7f7;
+  line-height: 40px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
 }
+
+.article-content h3 {
+  font-size: 1.25rem;
+  margin: 2rem 0 1rem;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+}
+
+.article-content blockquote {
+  padding-left: 12px;
+  font-size: 16px;
+  color: #7f828b;
+  margin-top: 15px;
+  margin-bottom: 15px;
+
+  border-left: 3px solid #0084ff;
+}
+.article-content, p {
+  word-break: break-all;
+}
+.article-content a:hover{
+  color: #0084ff;
+}
+.article-content a {
+  text-decoration: none;
+  color: #909090;
+}
+.article-content code {
+  margin-top: 20px;
+  padding: 20px;
+  font-size: 90%;
+  max-height: 35rem;
+  line-height: 1.8;
+  overflow: auto;
+}
+
+.article-content  p>code {
+  word-break: break-word;
+  border-radius: 2px;
+  margin-left: 3px;
+  margin-right: 3px;
+  overflow-x: auto;
+  background-color: #f7f7f7;
+  color: #ff502c;
+  font-size: 90%;
+  padding: .065em .4em!important;
+  display: inline!important;
+}
+
 
 .article-content ul{
   margin-left: 20px;
 }
-
+/*background: #f0f0f0 !important;*/
 .article-content .hljs {
   display: block;
-  background: #f0f0f0 !important;
   border-radius: 2px;
-  font: 14px/20px "Microsoft YaHei",Arial,Sans-Serif;
+  font: 16px/20px "Microsoft YaHei",Arial,Sans-Serif;
+}
+
+.article-content pre::-webkit-scrollbar{
+  width: 8px;
+  height: 6px;
+}
+.article-content pre::-webkit-scrollbar-thumb {
+  border-radius: 17px;
+  background-color: #cbcbcb;
 }
 .article-content pre{
   max-height: 700px;
   overflow-y: scroll;
-  padding: 10px 0;
+  padding: 0px 0;
 }
 .article-content pre code{
   padding: 10px;
@@ -1012,5 +1156,31 @@ export default {
   margin-left: 50px;
   height: 20px;
   background: #eaeaea;
+}
+
+.hljs ul li::marker{
+  content: counter(list-item)"    ";
+  color: #93999f!important;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.hljs ul {
+  list-style: decimal;
+  margin: 0 0 0 40px!important;
+  padding: 0
+}
+.hljs li {
+  list-style: decimal-leading-zero;
+  border-left: 2px solid #3377ff!important;
+  padding: 4px 5px!important;
+  margin: 0!important;
+  line-height: 14px;
+  width: 100%;
+  box-sizing: border-box
+}
+.hljs li:nth-of-type(even) {
+  background-color: rgba(255,255,255,.015);
+  color: inherit
 }
 </style>
