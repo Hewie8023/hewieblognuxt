@@ -84,7 +84,7 @@
           placement="left"
           width="200"
           trigger="hover">
-          <el-image fit="cover" src="https://mp.lucky-dogs.top/portal/image/1631198735305_885657217238302720.jpeg" ></el-image>
+          <el-image fit="cover" src="https://www.lucky-dogs.top/portal/image/1631198735305_885657217238302720.jpeg" ></el-image>
           <i slot="reference" class="hewieblog hewiewechat"></i>
         </el-popover>
       </div>
@@ -451,6 +451,9 @@ html::-webkit-scrollbar {
 html::-webkit-scrollbar-thumb {
   border-radius: 4px;
   background-color: #cbcbcb;
+}
+html::-webkit-scrollbar-thumb:hover {
+  background-color: #3377ff;
 }
 html::-webkit-scrollbar-track-piece {
   background: #eee;

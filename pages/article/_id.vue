@@ -37,12 +37,13 @@
             <div class="loading-content">
               <div class="loading-text"></div>
               <div class="loading-text animation-delay"></div>
+              <div class="loading-text"></div>
             </div>
-            <div class="loading-info clear-fix">
-              <div class="loading-type"></div>
-              <div class="loading-avatar"></div>
-              <div class="loading-nickname"></div>
-            </div>
+<!--            <div class="loading-info clear-fix">-->
+<!--              <div class="loading-type"></div>-->
+<!--              <div class="loading-avatar"></div>-->
+<!--              <div class="loading-nickname"></div>-->
+<!--            </div>-->
           </div>
 
 
@@ -105,7 +106,7 @@
                     <span class="item-replay-btn el-icon-chat-round" @click="onReplayClick(index, item.firstcomment.userId, item.firstcomment.userName)"> 回复</span>
                   </div>
                   <div class="article-comment-replay" v-if="item.replayList.length !== 0">
-                    <div v-for="(subItem, subIndex) in item.replayList" :index="'replay_' + subIndex">
+                    <div v-for="(subItem, subIndex) in item.replayList" :id="'replay_' + subIndex">
                       <div class="sub-comment-item">
                         <a :href="'/u/'+subItem.fromUid" target="_blank">
                           <div>
@@ -143,11 +144,7 @@
                       <el-button type="primary" size="large" @click="doSubComment(item.firstcomment.id)"> 回复 </el-button>
                     </div>
                   </div>
-
                 </div>
-
-
-
               </div>
             </div>
             <div class="load-more-comment" v-if="!isLastPage" @click="doLoadMore">加载更多评论 >> </div>
@@ -198,6 +195,18 @@
                 <a :href="'/u/'+article.userId" target="_blank">{{article.hewieUserNoPassword.userName}}</a>
               </div>
               <div class="article-company"><span>{{article.hewieUserNoPassword.position}}</span>@<span>{{article.hewieUserNoPassword.workspace}}</span></div>
+            </div>
+          </div>
+          <div class="user-info-list">
+            <div class="main">
+              <span class="icon el-icon-edit-outline"></span>
+              <span class="info-tips">文章</span>
+              <span class="count">64</span>
+            </div>
+            <div class="main">
+              <span class="icon hewieblog hewieview"></span>
+              <span class="info-tips">阅读</span>
+              <span class="count">60389</span>
             </div>
           </div>
         </div>
@@ -308,7 +317,7 @@ export default {
       clearInterval(timer)
     },500);
 
-    let e = document.querySelectorAll("code");
+    /*let e = document.querySelectorAll("code");
 
     let eLen = e.length;
     let i;
@@ -316,7 +325,7 @@ export default {
       if (e[i].classList.contains("hljs")) {
         e[i].innerHTML = "<ul><li>" + e[i].innerHTML.replace(/\n/g, "\n</li><li>") + "\n</li></ul>";
       }
-    }
+    }*/
   },
   beforeDestroy() {
     window.removeEventListener('scroll', this.onWindowScroll);
@@ -635,13 +644,10 @@ export default {
   width: 500px !important;
 }
 .sub-comment-input {
-  width: 600px;
   margin-right: 20px;
 }
 .sub-comment-btn{
   margin-top: 5px;
-  margin-left: 40px;
-  margin-right: 0px;
 }
 
 
@@ -682,7 +688,7 @@ export default {
   width:25px;
 }
 .sub-comment-nickname {
-  color: #0084ff;
+  color: #7f828b;
 }
 
 .sub-comment-content {
@@ -748,8 +754,8 @@ export default {
   margin-top: 10px;
 }
 .comment-user-name{
-  font-weight: 500;
-  color: #0084ff;;
+  font-weight: 600;
+  color: #93999f;
   font-size: 16px;
   line-height: 30px;
   margin-left: 10px;
@@ -772,7 +778,7 @@ export default {
 }
 
 .comment-submit-btn{
-  padding: 0 20px 0 20px;
+  padding: 0 10px 0 20px;
   text-align: right;
 }
 .comment-user-avatar{
@@ -873,9 +879,9 @@ export default {
 }
 .article-action-part{
   position: fixed;
-  top: 100px;
+  top: 140px;
   width: 20px;
-  margin-right: 20px;
+  margin-right: 25px;
 }
 
 .article-left-part{
@@ -973,6 +979,7 @@ export default {
 }
 
 .article-content{
+  margin-top: 50px;
   color: #333!important;
   line-height: 28px;
   font-size: 14px;
@@ -1055,7 +1062,7 @@ export default {
   overflow: auto;
 }
 
-.article-content  p>code {
+.article-content  p code , .article-content ol code, .article-content ol li code, .article-content ul code, .article-content ul li code{
   word-break: break-word;
   border-radius: 2px;
   margin-left: 3px;
@@ -1069,28 +1076,31 @@ export default {
 }
 
 
-.article-content ul{
+.article-content ul, .article-content ol{
   margin-left: 20px;
 }
 /*background: #f0f0f0 !important;*/
 .article-content .hljs {
   display: block;
   border-radius: 2px;
-  font: 16px/20px "Microsoft YaHei",Arial,Sans-Serif;
+  font: 14px/20px "Microsoft YaHei",Arial,Sans-Serif;
 }
 
-.article-content pre::-webkit-scrollbar{
-  width: 8px;
-  height: 6px;
+
+.article-content pre code::-webkit-scrollbar {
+  width: 8px ;
+  height: 6px ;
 }
-.article-content pre::-webkit-scrollbar-thumb {
-  border-radius: 17px;
+.article-content pre code::-webkit-scrollbar-thumb {
+  border-radius: 4px ;
   background-color: #cbcbcb;
 }
+.article-content pre code::-webkit-scrollbar-thumb:hover {
+  background-color: #3377ff;
+}
+
 .article-content pre{
   max-height: 700px;
-  overflow-y: scroll;
-  padding: 0px 0;
 }
 .article-content pre code{
   padding: 10px;
@@ -1158,29 +1168,54 @@ export default {
   background: #eaeaea;
 }
 
-.hljs ul li::marker{
-  content: counter(list-item)"    ";
-  color: #93999f!important;
+/*.hljs ul li::marker{*/
+/*  content: counter(list-item)"    ";*/
+/*  color: #93999f!important;*/
+/*  font-size: 16px;*/
+/*  font-weight: 600;*/
+/*}*/
+
+/*.hljs ul {*/
+/*  list-style: decimal;*/
+/*  margin: 0 0 0 40px!important;*/
+/*  padding: 0*/
+/*}*/
+/*.hljs li {*/
+/*  list-style: decimal-leading-zero;*/
+/*  border-left: 2px solid #3377ff!important;*/
+/*  padding: 4px 5px!important;*/
+/*  margin: 0!important;*/
+/*  line-height: 14px;*/
+/*  width: 100%;*/
+/*  box-sizing: border-box*/
+/*}*/
+/*.hljs li:nth-of-type(even) {*/
+/*  background-color: rgba(255,255,255,.015);*/
+/*  color: inherit*/
+/*}*/
+
+.user-info-list{
+  padding-left: 15px;
+  padding-bottom: 10px;
+  padding-right: 20px;
+  line-height: 40px;
   font-size: 16px;
-  font-weight: 600;
+  color: #646464;
 }
 
-.hljs ul {
-  list-style: decimal;
-  margin: 0 0 0 40px!important;
-  padding: 0
+.user-info-list .icon {
+  background: #e1efff;
+  padding: 8px;
+  border-radius: 50%;
+  color: #0084ff;
 }
-.hljs li {
-  list-style: decimal-leading-zero;
-  border-left: 2px solid #3377ff!important;
-  padding: 4px 5px!important;
-  margin: 0!important;
-  line-height: 14px;
-  width: 100%;
-  box-sizing: border-box
+
+.user-info-list .info-tips {
+  margin-left: 10px;
+  margin-right: 4px;
 }
-.hljs li:nth-of-type(even) {
-  background-color: rgba(255,255,255,.015);
-  color: inherit
+
+.user-info-list .count {
+  color: #0084ff;
 }
 </style>

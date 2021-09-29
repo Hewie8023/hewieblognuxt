@@ -380,14 +380,12 @@ export default {
   color: #0084ff;
 }
 
-.main-list-item .labels-item a:hover{
-  color: #37f !important;
-}
 
 .main-list-item .labels-item{
   margin-top: 15px;
   margin-right: 10px;
   background: #f3f2f4;
+  border-color: #e9e9eb;
 }
 .main-list-item .labels-item a{
   color: #a1a1a2 !important;
