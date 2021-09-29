@@ -5,7 +5,7 @@
       <div class="friends-link-list-container clear-fix">
         <div class="link-item float-left" v-for="(item,index) in friendLinks" :key="index">
           <el-tooltip effect="dark" :content="item.name" placement="top">
-            <a :href="item.url">
+            <a :href="item.url" target="_blank">
               <img :src="item.logo"/>
             </a>
           </el-tooltip>

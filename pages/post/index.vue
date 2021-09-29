@@ -126,6 +126,17 @@
 <script>
 import * as Api from '../../api/api'
 export default {
+  head() {
+    return {
+      titleTemplate: '幸运两小只-发表文章',
+      meta: [
+        { charset: 'utf-8' },
+        { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+        { hid: 'description', name: 'description', content: '幸运两小只博客，发表文章' },
+        { hid: 'keywords', name: 'keywords', content: '幸运两小只,Java,前端,博客系统,程序员' }
+      ]
+    }
+  },
   name: "index.vue",
   data(){
     return {

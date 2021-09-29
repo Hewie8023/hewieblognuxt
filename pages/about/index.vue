@@ -216,9 +216,26 @@ export default {
   min-height: 300px;
 
 }
-
+.about-right-part p{
+  padding: 10px 0;
+  display: block;
+  margin-block-start: 1em;
+  margin-block-end: 1em;
+  margin-inline-start: 0px;
+  margin-inline-end: 0px;
+}
+.about-right-part h1{
+  font-size: 1.8rem;
+  margin: 0px -20px;
+  padding: 5px 25px;
+  border-left: 5px solid #0084ff;
+  background-color: #f7f7f7;
+  line-height: 40px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+}
 .about-right-part{
   width: 840px;
   margin-left: 300px;
+  padding: 20px;
 }
 </style>

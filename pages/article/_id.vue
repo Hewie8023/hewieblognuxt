@@ -1,10 +1,21 @@
 <template>
   <div id="article-main-box">
     <div id="article-box" class="index-page-box clear-fix">
+      <div class="article-action-part float-left">
+        <div class="action-item hewieblog hewiedianzan">
+        </div>
+        <div class="action-item hewieblog hewieshoucang"></div>
+        <div class="action-item hewieblog hewiefenxiang2"  @click="getArticleUrl"></div>
+        <div style="display: none" ><el-input id="input" v-model="artileUrl"></el-input></div>
+        <div class="action-item hewieblog hewiepinglun" @click="goToCommentBox"></div>
+      </div>
       <div class="article-left-part float-left">
         <div class="article-content-box">
           <div class="article-title">
             <span v-text="article.title"></span>
+          </div>
+          <div class="article-cover">
+            <img :src="'/portal/image/'+article.cover">
           </div>
           <div class="article-info">
             <img :src="article.hewieUserNoPassword.avatar"  style="object-fit:cover;"/>
@@ -26,12 +37,13 @@
             <div class="loading-content">
               <div class="loading-text"></div>
               <div class="loading-text animation-delay"></div>
+              <div class="loading-text"></div>
             </div>
-            <div class="loading-info clear-fix">
-              <div class="loading-type"></div>
-              <div class="loading-avatar"></div>
-              <div class="loading-nickname"></div>
-            </div>
+<!--            <div class="loading-info clear-fix">-->
+<!--              <div class="loading-type"></div>-->
+<!--              <div class="loading-avatar"></div>-->
+<!--              <div class="loading-nickname"></div>-->
+<!--            </div>-->
           </div>
 
 
@@ -40,7 +52,7 @@
           <div class="right-show-text">
             <span class="el-icon-warning-outline"></span>
             本文由
-            <a :href="'/user/'+article.userId" target="_blank" class="right-article-name">{{article.hewieUserNoPassword.userName}}</a>
+            <a :href="'/u/'+article.userId" target="_blank" class="right-article-name">{{article.hewieUserNoPassword.userName}}</a>
             原创发布于
             <a href="/" target="_blank">幸运两小只</a>
             ，未经作者授权，禁止转载
@@ -51,7 +63,7 @@
           <div class="article-comment-input" id="article-comment-input">
             <div class="comment-part-title">评论</div>
             <div class="comment-input clear-fix">
-              <div class="float-left">
+              <div class="float-left" style="display: inline-block">
                 <img v-if="userInfo !== null" :src="userInfo.avatar" class="comment-user-avatar"/>
                 <img v-else class="comment-user-avatar" src="https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png"/>
               </div>
@@ -78,39 +90,59 @@
             <div class="comment-item-list">
               <div class="article-comment-item" v-for="(item,index) in commentList" :key="'comment_'+index">
                 <div class="article-comment-user-info">
-                  <a :href="'/u/'+item.userId">
-                    <el-avatar :src="item.userAvatar"></el-avatar>
-                    <span class="comment-user-name">{{item.userName}}</span>
+                  <a :href="'/u/'+item.firstcomment.userId">
+                    <el-avatar  :src="item.firstcomment.userAvatar"></el-avatar>
+                    <span class="comment-user-name">{{item.firstcomment.userName}}</span>
                   </a>
-                  <el-tag v-if="item.state === '2'" size="mini" type="danger">置顶</el-tag>
+                  <el-tag v-if="item.firstcomment.state === '2'" size="mini" type="danger">置顶</el-tag>
                 </div>
-                <div class="article-comment-replay" v-if="item.parentContent !== null && item.parentContent !== ''">
-                  <span>回复：{{item.parentContent}}</span>
-                </div>
-                <div class="article-comment-content">
-                  {{item.content}}
-                </div>
-                <div class="article-comment-action">
-                  <span>{{item.createTime | formatDate('yyyy-MM-dd hh:mm')}}</span>
-                  <span class="item-replay-btn" @click="onReplayClick(index, item.userName)">回复</span>
-                </div>
-                <div class="article-sub-comment-box clear-fix" style="display: none" :id="'sub_comment_input_'+index">
-                  <div class="sub-comment-input float-left">
-                    <img v-if="userInfo !== null" :src="userInfo.avatar" class="comment-user-avatar"/>
-                    <img v-else class="comment-user-avatar"/>
-                    <el-input
-                      rows="2"
-                      type="textarea"
-                      :placeholder="subCommentPlaceholder"
-                      v-model="subComment"
-                      maxlength="256"
-                      show-word-limit
-                      @focus="checkLogin"
-                    >
-                    </el-input>
+
+                <div class="comment-content-detail">
+                  <div class="article-comment-content">
+                    {{item.firstcomment.content}}
                   </div>
-                  <div class="sub-comment-btn float-left">
-                    <el-button type="primary" size="small" @click="doSubComment(item.content)">回复</el-button>
+                  <div class="article-comment-action clear-fix">
+                    <span class="comment-time float-left">{{item.firstcomment.createTime | formatDate('yyyy-MM-dd hh:mm')}}</span>
+                    <span class="item-replay-btn el-icon-chat-round" @click="onReplayClick(index, item.firstcomment.userId, item.firstcomment.userName)"> 回复</span>
+                  </div>
+                  <div class="article-comment-replay" v-if="item.replayList.length !== 0">
+                    <div v-for="(subItem, subIndex) in item.replayList" :id="'replay_' + subIndex">
+                      <div class="sub-comment-item">
+                        <a :href="'/u/'+subItem.fromUid" target="_blank">
+                          <div>
+                            <img :src="subItem.fromUavatar" class="sub-comment-user-avatar">
+                            <span class="sub-comment-nickname" v-text="subItem.fromUname"></span>
+                          </div>
+                        </a>
+                        <div class="sub-comment-content">
+                          回复
+                          <a :href="'/u/'+subItem.toUid" target="_blank"> @ {{subItem.toUname}}</a>：
+                          {{subItem.content}}
+                        </div>
+                        <div class="clear-fix">
+                          <span class="sub-publish-time ">{{subItem.createTime | formatDate('yyyy-MM-dd hh:mm')}}</span>
+                          <span class="sub-reply-text  el-icon-chat-round" @click="onReplayClick(index, subItem.fromUid, subItem.fromUname)"> 回复</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="article-sub-comment-box clear-fix" style="display: none" :id="'sub_comment_input_'+index">
+                    <div class="sub-comment-input float-left">
+                      <el-input
+                        rows="2"
+                        type="textarea"
+                        :placeholder="subCommentPlaceholder"
+                        v-model="subComment"
+                        maxlength="256"
+                        show-word-limit
+                        @focus="checkLogin"
+                      >
+                      </el-input>
+                    </div>
+                    <div class="sub-comment-btn float-left">
+                      <el-button type="primary" size="large" @click="doSubComment(item.firstcomment.id)"> 回复 </el-button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -162,7 +194,19 @@
               <div class="article-user-name">
                 <a :href="'/u/'+article.userId" target="_blank">{{article.hewieUserNoPassword.userName}}</a>
               </div>
-              <div class="article-company"><span>无业游民</span>@<span>地球村</span></div>
+              <div class="article-company"><span>{{article.hewieUserNoPassword.position}}</span>@<span>{{article.hewieUserNoPassword.workspace}}</span></div>
+            </div>
+          </div>
+          <div class="user-info-list">
+            <div class="main">
+              <span class="icon el-icon-edit-outline"></span>
+              <span class="info-tips">文章</span>
+              <span class="count">64</span>
+            </div>
+            <div class="main">
+              <span class="icon hewieblog hewieview"></span>
+              <span class="info-tips">阅读</span>
+              <span class="count">60389</span>
             </div>
           </div>
         </div>
@@ -189,9 +233,12 @@
 <script>
 import * as Api from "../../api/api";
 import hljs from 'highlight.js';
-import 'highlight.js/styles/idea.css';
+import 'highlight.js/styles/lioshi.css';
 import Catelog  from '../../utils/headerLineHandler'
 let lastInputBox = null;
+import Vue from 'vue'
+import VueClipboard from 'vue-clipboard2'
+Vue.use(VueClipboard)
 export default {
   head() {
     return {
@@ -206,6 +253,7 @@ export default {
   },
   data(){
     return {
+      artileUrl:'',
       isImageDialogShow:false,
       targetImagePath:'',
       userInfo:null,
@@ -214,11 +262,21 @@ export default {
         articleId:'',
         parentContent:'',
       },
+      replay:{
+        content:'',
+        fatherCommentId:'',
+        articleId:'',
+        fromUid:'',
+        toUid:''
+      },
       subComment:'',
       currentPage:1,
       pageSize:5,
-      subCommentPlaceholder:'回复',
+      subCommentPlaceholder:'回复 ',
       isArticleProcessing:true,
+      toUid:'',
+      isCopy: false,
+
     }
   },
   async asyncData({params}){
@@ -226,6 +284,7 @@ export default {
     let recommendArticleRes = await Api.getRecommendArticles(params.id, 10);
     //加載第一页评论数据
     let commentRes = await Api.getCommentsByArticleId(params.id, 1, 5);
+    //console.log(commentRes)
     let labels = '';
     articleRes.data.labelList.forEach((label,index)=>{
       labels+=',';
@@ -234,7 +293,7 @@ export default {
     return {
       article: articleRes.data,
       recommendArticles: recommendArticleRes.data,
-      commentList:commentRes.data.contents,
+      commentList:commentRes.data.commentContent,
       isLastPage: commentRes.data.last,
       labelList: labels
     }
@@ -256,30 +315,42 @@ export default {
     let timer = setInterval(function (){
       that.isArticleProcessing = false;
       clearInterval(timer)
-    },1000);
+    },500);
+
+    /*let e = document.querySelectorAll("code");
+
+    let eLen = e.length;
+    let i;
+    for (i = 0; i < eLen; i++) {
+      if (e[i].classList.contains("hljs")) {
+        e[i].innerHTML = "<ul><li>" + e[i].innerHTML.replace(/\n/g, "\n</li><li>") + "\n</li></ul>";
+      }
+    }*/
   },
   beforeDestroy() {
     window.removeEventListener('scroll', this.onWindowScroll);
   },
   methods:{
     scrollInToComment(){
-      let commentInputBox = document.getElementById('article-comment-input');
-      if (commentInputBox) {
-        commentInputBox.scrollIntoView({
-          block: "start",
-          behavior:"smooth"
-        })
-      }
+      let commentBox = document.getElementById("article-comment-input");
+      document.documentElement.scrollTo({
+        top: commentBox.offsetTop,
+        behavior: "smooth"
+      })
     },
-    doSubComment(parentContent){
+    doSubComment(commentId){
+
       if (this.subComment === '') {
-        this.$message.error('评论内容不能为空');
+        this.$message.error('回复内容不能为空');
         return;
       }
-      this.comment.content = this.subComment;
-      this.comment.parentContent = parentContent;
-      this.comment.articleId = this.article.id;
-      Api.postComment(this.comment).then(result=>{
+      this.replay.content = this.subComment;
+      this.replay.articleId = this.article.id;
+      this.replay.toUid = this.toUid;
+      this.replay.fatherCommentId = commentId;
+
+
+      Api.postReplay(this.replay).then(result=>{
         if (result.code === Api.success_code) {
           this.$message.success(result.message);
           this.getArticleCommentByPage(1);
@@ -296,10 +367,12 @@ export default {
         }
       })
     },
-    onReplayClick(index, userName){
+    onReplayClick(index, userId, userName){
+      this.toUid = userId;
+      //console.log(this.toUid)
       let subInputBox = document.getElementById('sub_comment_input_'+index);
       this.subComment = '';
-      this.subCommentPlaceholder = '回复@' +userName;
+      this.subCommentPlaceholder = '回复 @ ' +userName;
       if (subInputBox) {
         if (lastInputBox) {
           lastInputBox.style.display = 'none';
@@ -312,7 +385,7 @@ export default {
       this.currentPage++;
       Api.getCommentsByArticleId(this.article.id, this.currentPage, this.pageSize).then(result=>{
         if (result.code === Api.success_code) {
-          this.commentList = this.commentList.concat(result.data.contents);
+          this.commentList = this.commentList.concat(result.data.commentContent);
           this.isLastPage= result.data.last;
         }
       }).catch(error=>{
@@ -353,7 +426,7 @@ export default {
     getArticleCommentByPage(page){
       Api.getCommentsByArticleId(this.article.id, page, this.pageSize).then(result=>{
         if (result.code === Api.success_code) {
-          this.commentList = result.data.contents;
+          this.commentList = result.data.commentContent;
           this.currentPage = page;
         }
       })
@@ -416,6 +489,24 @@ export default {
         }
       }
     },
+    goToCommentBox(){
+      let commentBox = document.getElementById("article-comment-input");
+      document.documentElement.scrollTo({
+        top: commentBox.offsetTop,
+        behavior: "smooth"
+      })
+    },
+    getArticleUrl(){
+      this.artileUrl = location.href;
+      this.$copyText(this.artileUrl).then(function (e) {
+        //alert('Copied')
+        this.isCopy = true;
+      }, function (e) {
+        //alert('Can not copy')
+        this.isCopy = false;
+      });
+      this.$message.success('分享链接复制成功')
+    }
   }
 
 }
@@ -549,11 +640,16 @@ export default {
 .article-sub-comment-box{
   margin-top: 10px;
 }
-.sub-comment-input {
-  width: 600px;
-  margin-left: 40px;
-  margin-right: 40px;
+.sub-comment-input .el-textarea{
+  width: 500px !important;
 }
+.sub-comment-input {
+  margin-right: 20px;
+}
+.sub-comment-btn{
+  margin-top: 5px;
+}
+
 
 .load-more-comment:hover,.no-more-comment:hover{
   color: #3377ff;
@@ -567,37 +663,102 @@ export default {
 }
 
 .article-comment-replay{
-  padding: 10px;
-  background: #f5f5f5;
-  margin-left: 30px;
   -webkit-box-orient: vertical;
   -webkit-line-clamp:1;
   overflow: hidden;
+  background: #fafbfc;
+  padding: 10px;
+  border-radius: 4px;
+  margin-right: 10px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.sub-comment-item {
+  border-bottom: 1px solid #f0f7ff;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+}
+
+.sub-comment-user-avatar {
+  border-radius: 50%;
+  height: 25px;
+  margin-right: 10px;
+  margin-bottom: -8px;
+  width:25px;
+}
+.sub-comment-nickname {
+  color: #7f828b;
+}
+
+.sub-comment-content {
+  padding: 10px;
+  margin: 5px 30px;
+  line-height: 24px;
+  font-size: 14px;
+  color: #999;
+}
+
+.sub-comment-content a {
+  color: #0084ff;
+}
+.sub-publish-time {
+  float: left;
+  font-size: 13px;
+  margin-left: 40px;
+  color: #8a93a0;
+}
+.sub-reply-text {
+  float: right;
+  cursor: pointer;
+  font-size: 14px;
+  color: #8a93a0;
 }
 .article-comment-content{
-  padding: 10px;
-  margin-left: 30px;
+  line-height: 24px;
+  max-width: 500px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  word-wrap: break-word;
+  word-break: break-all;
+  color: #505050;
+  font-size: 15px;
+  overflow: hidden;
 }
-.item-replay-btn:hover{
-  color: #3377ff;
+
+.comment-content-detail {
+  margin-left: 45px;
+  border-bottom: 1px solid #f1f1f1;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
 }
+
 .item-replay-btn{
   cursor: pointer;
+  float: right;
+  margin-right: 10px;
+  font-size: 14px;
+  color: #8a93a0;
 }
 .article-comment-action{
   color: #b2bac2;
   text-align: right;
-  margin-right: 50px;
 }
+
+.comment-time{
+  color: #8a93a0;
+  font-size: 13px;
+}
+
 .comment-item-list{
   margin-top: 10px;
 }
 .comment-user-name{
   font-weight: 600;
-  color: #b2bac2;
-  font-size: 14px;
+  color: #93999f;
+  font-size: 16px;
   line-height: 30px;
-  margin-left: 5px;
+  margin-left: 10px;
 }
 .article-comment-user-info{
   margin-bottom: 10px;
@@ -617,7 +778,7 @@ export default {
 }
 
 .comment-submit-btn{
-  padding: 0 20px 0 20px;
+  padding: 0 10px 0 20px;
   text-align: right;
 }
 .comment-user-avatar{
@@ -628,7 +789,7 @@ export default {
   margin-right: 10px;
 }
 .comment-input-box{
-  width: 710px;
+  width: 680px;
 }
 .comment-input{
   display: inline-block;
@@ -704,8 +865,28 @@ export default {
   margin-bottom: 20px;
 
 }
+
+.article-action-part .action-item:hover {
+  color: #3377ff;
+}
+.article-action-part .action-item{
+  font-size: 24px;
+  font-weight: 600;
+  color: #93999f;
+  margin: 30px 5px;
+  cursor: pointer;
+
+}
+.article-action-part{
+  position: fixed;
+  top: 140px;
+  width: 20px;
+  margin-right: 25px;
+}
+
 .article-left-part{
-  width: 820px;
+  width: 780px;
+  margin-left: 40px;
   margin-right: 20px;
 }
 
@@ -798,16 +979,29 @@ export default {
 }
 
 .article-content{
+  margin-top: 50px;
   color: #333!important;
   line-height: 28px;
   font-size: 14px;
 }
 .article-content img{
-  max-width: 780px;
+  max-width: 740px;
   padding: 10px 0;
   cursor: zoom-in;
 }
-
+.article-cover {
+  overflow: hidden;
+  margin-bottom: 20px;
+  margin-top: 20px;
+  line-height: 40px;
+}
+.article-cover img {
+   -o-object-fit: cover;
+   object-fit: cover;
+   width: 100%;
+   max-height: 200px;
+   border-radius: 4px;
+ }
 .article-content p{
   padding: 10px 0;
   display: block;
@@ -817,31 +1011,96 @@ export default {
   margin-inline-end: 0px;
 }
 .article-content h1{
-  color: #93999f;
+  font-size: 1.75rem;
+  margin: 2.5rem 0 1rem;
+  padding-bottom: 1.75rem;
+  border-bottom: 1px double rgba(0,0,0,.1);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+}
+
+.article-content h2 {
+  font-size: 1.55rem;
+  margin: 15px -20px;
+  padding: 0 25px;
+  border-left: 5px solid #0084ff;
+  background-color: #f7f7f7;
   line-height: 40px;
-  padding: 12px 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
 }
 
-.article-content h2{
-  color: #93999f;
-  line-height: 36px;
-  padding: 12px 0;
+.article-content h3 {
+  font-size: 1.25rem;
+  margin: 2rem 0 1rem;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
 }
 
-.article-content ul{
+.article-content blockquote {
+  padding-left: 12px;
+  font-size: 16px;
+  color: #7f828b;
+  margin-top: 15px;
+  margin-bottom: 15px;
+
+  border-left: 3px solid #0084ff;
+}
+.article-content, p {
+  word-break: break-all;
+}
+.article-content a:hover{
+  color: #0084ff;
+}
+.article-content a {
+  text-decoration: none;
+  color: #909090;
+}
+.article-content code {
+  margin-top: 20px;
+  padding: 20px;
+  font-size: 90%;
+  max-height: 35rem;
+  line-height: 1.8;
+  overflow: auto;
+}
+
+.article-content  p code , .article-content ol code, .article-content ol li code, .article-content ul code, .article-content ul li code{
+  word-break: break-word;
+  border-radius: 2px;
+  margin-left: 3px;
+  margin-right: 3px;
+  overflow-x: auto;
+  background-color: #f7f7f7;
+  color: #ff502c;
+  font-size: 90%;
+  padding: .065em .4em!important;
+  display: inline!important;
+}
+
+
+.article-content ul, .article-content ol{
   margin-left: 20px;
 }
-
+/*background: #f0f0f0 !important;*/
 .article-content .hljs {
   display: block;
-  background: #f0f0f0 !important;
   border-radius: 2px;
   font: 14px/20px "Microsoft YaHei",Arial,Sans-Serif;
 }
+
+
+.article-content pre code::-webkit-scrollbar {
+  width: 8px ;
+  height: 6px ;
+}
+.article-content pre code::-webkit-scrollbar-thumb {
+  border-radius: 4px ;
+  background-color: #cbcbcb;
+}
+.article-content pre code::-webkit-scrollbar-thumb:hover {
+  background-color: #3377ff;
+}
+
 .article-content pre{
   max-height: 700px;
-  overflow-y: scroll;
-  padding: 10px 0;
 }
 .article-content pre code{
   padding: 10px;
@@ -907,5 +1166,56 @@ export default {
   margin-left: 50px;
   height: 20px;
   background: #eaeaea;
+}
+
+/*.hljs ul li::marker{*/
+/*  content: counter(list-item)"    ";*/
+/*  color: #93999f!important;*/
+/*  font-size: 16px;*/
+/*  font-weight: 600;*/
+/*}*/
+
+/*.hljs ul {*/
+/*  list-style: decimal;*/
+/*  margin: 0 0 0 40px!important;*/
+/*  padding: 0*/
+/*}*/
+/*.hljs li {*/
+/*  list-style: decimal-leading-zero;*/
+/*  border-left: 2px solid #3377ff!important;*/
+/*  padding: 4px 5px!important;*/
+/*  margin: 0!important;*/
+/*  line-height: 14px;*/
+/*  width: 100%;*/
+/*  box-sizing: border-box*/
+/*}*/
+/*.hljs li:nth-of-type(even) {*/
+/*  background-color: rgba(255,255,255,.015);*/
+/*  color: inherit*/
+/*}*/
+
+.user-info-list{
+  padding-left: 15px;
+  padding-bottom: 10px;
+  padding-right: 20px;
+  line-height: 40px;
+  font-size: 16px;
+  color: #646464;
+}
+
+.user-info-list .icon {
+  background: #e1efff;
+  padding: 8px;
+  border-radius: 50%;
+  color: #0084ff;
+}
+
+.user-info-list .info-tips {
+  margin-left: 10px;
+  margin-right: 4px;
+}
+
+.user-info-list .count {
+  color: #0084ff;
 }
 </style>
