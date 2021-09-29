@@ -25,20 +25,18 @@
         </div>
         <div class="header-right-part">
           <div id="user-info-box" style="display: none" class="user-info-box float-left clear-fix">
-            <div class="header-user-avatar float-left">
-              <img v-if="userInfo !== null" style="object-fit: cover" :src="userInfo.avatar" />
-            </div>
             <div class="header-user-username float-right" v-if="userInfo !== null">
               <el-dropdown @command="handleCommand">
-            <span  class="header-user-username-link">
-              {{ userInfo.userName }}
-            </span>
+                <a :href="'/u/'+userInfo.id" target="_blank">个人中心 </a>
                 <el-dropdown-menu slot="dropdown">
-                  <el-dropdown-item command="userInfo">用户信息</el-dropdown-item>
                   <el-dropdown-item command="admin" v-if="userInfo.roles === 'role_admin'">管理中心</el-dropdown-item>
                   <el-dropdown-item command="logout">退出登录</el-dropdown-item>
                 </el-dropdown-menu>
               </el-dropdown>
+
+              ·
+
+              <a href="/post" target="_blank"> 发表文章</a>
             </div>
           </div>
           <div id="login-text-box" style="display: none" class="login-text-box">
@@ -306,7 +304,11 @@ export default {
     float: right;
     line-height: 61px;
   }
-
+.header-user-username a{
+  text-decoration: none;
+  color: #909090;
+  font-size: 14px;
+}
   .login-text-box{
     line-height: 61px;
   }
