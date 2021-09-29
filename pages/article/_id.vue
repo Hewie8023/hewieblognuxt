@@ -89,47 +89,65 @@
             <div class="comment-item-list">
               <div class="article-comment-item" v-for="(item,index) in commentList" :key="'comment_'+index">
                 <div class="article-comment-user-info">
-                  <a :href="'/u/'+item.userId">
-                    <el-avatar :src="item.userAvatar"></el-avatar>
-                    <span class="comment-user-name">{{item.userName}}</span>
+                  <a :href="'/u/'+item.firstcomment.userId">
+                    <el-avatar  :src="item.firstcomment.userAvatar"></el-avatar>
+                    <span class="comment-user-name">{{item.firstcomment.userName}}</span>
                   </a>
-                  <el-tag v-if="item.state === '2'" size="mini" type="danger">置顶</el-tag>
+                  <el-tag v-if="item.firstcomment.state === '2'" size="mini" type="danger">置顶</el-tag>
                 </div>
-                <div class="article-comment-replay" v-if="item.parentContent !== null && item.parentContent !== ''">
-                  <span>回复：{{item.parentContent}}</span>
-                </div>
-                <div class="article-comment-content">
-                  {{item.content}}
-                </div>
-                <div class="article-comment-action">
-                  <span>{{item.createTime | formatDate('yyyy-MM-dd hh:mm')}}</span>
-                  <span class="item-replay-btn" @click="onReplayClick(index, item.userName)">回复</span>
-                </div>
-                <div class="article-sub-comment-box clear-fix" style="display: none" :id="'sub_comment_input_'+index">
-                  <div class="sub-comment-input float-left">
-                    <div class="clear-fix">
-                      <div class="float-left">
-                        <img v-if="userInfo !== null" :src="userInfo.avatar" class="comment-user-avatar" style="display: inline-block"/>
-                        <img v-else class="comment-user-avatar"/>
-                      </div>
-                      <div class="float-left">
-                        <el-input
-                          rows="2"
-                          type="textarea"
-                          :placeholder="subCommentPlaceholder"
-                          v-model="subComment"
-                          maxlength="256"
-                          show-word-limit
-                          @focus="checkLogin"
-                        >
-                        </el-input>
+
+                <div class="comment-content-detail">
+                  <div class="article-comment-content">
+                    {{item.firstcomment.content}}
+                  </div>
+                  <div class="article-comment-action clear-fix">
+                    <span class="comment-time float-left">{{item.firstcomment.createTime | formatDate('yyyy-MM-dd hh:mm')}}</span>
+                    <span class="item-replay-btn el-icon-chat-round" @click="onReplayClick(index, item.firstcomment.userId, item.firstcomment.userName)"> 回复</span>
+                  </div>
+                  <div class="article-comment-replay" v-if="item.replayList.length !== 0">
+                    <div v-for="(subItem, subIndex) in item.replayList" :index="'replay_' + subIndex">
+                      <div class="sub-comment-item">
+                        <a :href="'/u/'+subItem.fromUid" target="_blank">
+                          <div>
+                            <img :src="subItem.fromUavatar" class="sub-comment-user-avatar">
+                            <span class="sub-comment-nickname" v-text="subItem.fromUname"></span>
+                          </div>
+                        </a>
+                        <div class="sub-comment-content">
+                          回复
+                          <a :href="'/u/'+subItem.toUid" target="_blank"> @ {{subItem.toUname}}</a>：
+                          {{subItem.content}}
+                        </div>
+                        <div class="clear-fix">
+                          <span class="sub-publish-time ">{{subItem.createTime | formatDate('yyyy-MM-dd hh:mm')}}</span>
+                          <span class="sub-reply-text  el-icon-chat-round" @click="onReplayClick(index, subItem.fromUid, subItem.fromUname)"> 回复</span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                  <div class="sub-comment-btn float-left">
-                    <el-button type="primary" size="small" @click="doSubComment(item.content)">回复</el-button>
+
+                  <div class="article-sub-comment-box clear-fix" style="display: none" :id="'sub_comment_input_'+index">
+                    <div class="sub-comment-input float-left">
+                      <el-input
+                        rows="2"
+                        type="textarea"
+                        :placeholder="subCommentPlaceholder"
+                        v-model="subComment"
+                        maxlength="256"
+                        show-word-limit
+                        @focus="checkLogin"
+                      >
+                      </el-input>
+                    </div>
+                    <div class="sub-comment-btn float-left">
+                      <el-button type="primary" size="large" @click="doSubComment(item.firstcomment.id)"> 回复 </el-button>
+                    </div>
                   </div>
+
                 </div>
+
+
+
               </div>
             </div>
             <div class="load-more-comment" v-if="!isLastPage" @click="doLoadMore">加载更多评论 >> </div>
@@ -235,12 +253,21 @@ export default {
         articleId:'',
         parentContent:'',
       },
+      replay:{
+        content:'',
+        fatherCommentId:'',
+        articleId:'',
+        fromUid:'',
+        toUid:''
+      },
       subComment:'',
       currentPage:1,
       pageSize:5,
-      subCommentPlaceholder:'回复',
+      subCommentPlaceholder:'回复 ',
       isArticleProcessing:true,
+      toUid:'',
       isCopy: false,
+
     }
   },
   async asyncData({params}){
@@ -248,6 +275,7 @@ export default {
     let recommendArticleRes = await Api.getRecommendArticles(params.id, 10);
     //加載第一页评论数据
     let commentRes = await Api.getCommentsByArticleId(params.id, 1, 5);
+    //console.log(commentRes)
     let labels = '';
     articleRes.data.labelList.forEach((label,index)=>{
       labels+=',';
@@ -256,7 +284,7 @@ export default {
     return {
       article: articleRes.data,
       recommendArticles: recommendArticleRes.data,
-      commentList:commentRes.data.contents,
+      commentList:commentRes.data.commentContent,
       isLastPage: commentRes.data.last,
       labelList: labels
     }
@@ -301,15 +329,19 @@ export default {
         behavior: "smooth"
       })
     },
-    doSubComment(parentContent){
+    doSubComment(commentId){
+
       if (this.subComment === '') {
-        this.$message.error('评论内容不能为空');
+        this.$message.error('回复内容不能为空');
         return;
       }
-      this.comment.content = this.subComment;
-      this.comment.parentContent = parentContent;
-      this.comment.articleId = this.article.id;
-      Api.postComment(this.comment).then(result=>{
+      this.replay.content = this.subComment;
+      this.replay.articleId = this.article.id;
+      this.replay.toUid = this.toUid;
+      this.replay.fatherCommentId = commentId;
+
+
+      Api.postReplay(this.replay).then(result=>{
         if (result.code === Api.success_code) {
           this.$message.success(result.message);
           this.getArticleCommentByPage(1);
@@ -326,10 +358,12 @@ export default {
         }
       })
     },
-    onReplayClick(index, userName){
+    onReplayClick(index, userId, userName){
+      this.toUid = userId;
+      //console.log(this.toUid)
       let subInputBox = document.getElementById('sub_comment_input_'+index);
       this.subComment = '';
-      this.subCommentPlaceholder = '回复@' +userName;
+      this.subCommentPlaceholder = '回复 @ ' +userName;
       if (subInputBox) {
         if (lastInputBox) {
           lastInputBox.style.display = 'none';
@@ -342,7 +376,7 @@ export default {
       this.currentPage++;
       Api.getCommentsByArticleId(this.article.id, this.currentPage, this.pageSize).then(result=>{
         if (result.code === Api.success_code) {
-          this.commentList = this.commentList.concat(result.data.contents);
+          this.commentList = this.commentList.concat(result.data.commentContent);
           this.isLastPage= result.data.last;
         }
       }).catch(error=>{
@@ -383,7 +417,7 @@ export default {
     getArticleCommentByPage(page){
       Api.getCommentsByArticleId(this.article.id, page, this.pageSize).then(result=>{
         if (result.code === Api.success_code) {
-          this.commentList = result.data.contents;
+          this.commentList = result.data.commentContent;
           this.currentPage = page;
         }
       })
@@ -602,12 +636,14 @@ export default {
 }
 .sub-comment-input {
   width: 600px;
+  margin-right: 20px;
+}
+.sub-comment-btn{
+  margin-top: 5px;
   margin-left: 40px;
   margin-right: 0px;
 }
-.sub-comment-btn{
-  margin-left: -10px;
-}
+
 
 .load-more-comment:hover,.no-more-comment:hover{
   color: #3377ff;
@@ -621,37 +657,102 @@ export default {
 }
 
 .article-comment-replay{
-  padding: 10px;
-  background: #f5f5f5;
-  margin-left: 30px;
   -webkit-box-orient: vertical;
   -webkit-line-clamp:1;
   overflow: hidden;
+  background: #fafbfc;
+  padding: 10px;
+  border-radius: 4px;
+  margin-right: 10px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.sub-comment-item {
+  border-bottom: 1px solid #f0f7ff;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+}
+
+.sub-comment-user-avatar {
+  border-radius: 50%;
+  height: 25px;
+  margin-right: 10px;
+  margin-bottom: -8px;
+  width:25px;
+}
+.sub-comment-nickname {
+  color: #0084ff;
+}
+
+.sub-comment-content {
+  padding: 10px;
+  margin: 5px 30px;
+  line-height: 24px;
+  font-size: 14px;
+  color: #999;
+}
+
+.sub-comment-content a {
+  color: #0084ff;
+}
+.sub-publish-time {
+  float: left;
+  font-size: 13px;
+  margin-left: 40px;
+  color: #8a93a0;
+}
+.sub-reply-text {
+  float: right;
+  cursor: pointer;
+  font-size: 14px;
+  color: #8a93a0;
 }
 .article-comment-content{
-  padding: 10px;
-  margin-left: 30px;
+  line-height: 24px;
+  max-width: 500px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  word-wrap: break-word;
+  word-break: break-all;
+  color: #505050;
+  font-size: 15px;
+  overflow: hidden;
 }
-.item-replay-btn:hover{
-  color: #3377ff;
+
+.comment-content-detail {
+  margin-left: 45px;
+  border-bottom: 1px solid #f1f1f1;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
 }
+
 .item-replay-btn{
   cursor: pointer;
+  float: right;
+  margin-right: 10px;
+  font-size: 14px;
+  color: #8a93a0;
 }
 .article-comment-action{
   color: #b2bac2;
   text-align: right;
-  margin-right: 50px;
 }
+
+.comment-time{
+  color: #8a93a0;
+  font-size: 13px;
+}
+
 .comment-item-list{
   margin-top: 10px;
 }
 .comment-user-name{
-  font-weight: 600;
-  color: #b2bac2;
-  font-size: 14px;
+  font-weight: 500;
+  color: #0084ff;;
+  font-size: 16px;
   line-height: 30px;
-  margin-left: 5px;
+  margin-left: 10px;
 }
 .article-comment-user-info{
   margin-bottom: 10px;

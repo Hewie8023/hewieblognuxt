@@ -115,15 +115,20 @@ export const getRecommendArticles = (id, size) => {
 
 export const getCommentsByArticleId = (id, page, size) => {
   if (process.client) {
-    return http.requestGet('/portal/comment/list/'+id+'/'+page+'/'+size);
+    return http.requestGet('/portal/comment/list/2/'+id+'/'+page+'/'+size);
   } else {
-    return http.requestGet(baseUrl + '/portal/comment/list/'+id+'/'+page+'/'+size);
+    return http.requestGet(baseUrl + '/portal/comment/list/2/'+id+'/'+page+'/'+size);
   }
 }
 
 export const postComment = (comment) => {
-  return http.requestPost('/portal/comment', comment);
+  return http.requestPost('/portal/comment/first-comment', comment);
 }
+export const postReplay = (replay) => {
+  return http.requestPost('/portal/comment/replay', replay);
+}
+
+
 
 export const updateUserInfo = (userInfo, userId) => {
   return http.requestPut('/user/user_info/' +　userId, userInfo);

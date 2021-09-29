@@ -129,7 +129,7 @@
         <div class="right-login-success border-radius-default" >
           <div class="user-info-content" v-if="loginUserInfo !== ''">
             <div class="user-info-back" style="height: 50px; background: rgb(0, 132, 255);"></div>
-            <div>
+            <div class="user-info-detail">
               <div class="user-avatar" @click="goUserInfoPage" style="cursor: pointer">
                 <img :src="loginUserInfo.avatar" style="object-fit: cover;">
               </div>
@@ -139,7 +139,19 @@
               <div class="user-sign">
                 <span v-text="loginUserInfo.sign"></span>
               </div>
-              <el-button @click="postArticle" class="post-article-btn" type="primary" size="mini">发表文章</el-button>
+<!--              <el-button @click="postArticle" class="post-article-btn" type="primary" size="mini">发表文章</el-button>-->
+            </div>
+            <div class="user-info-list">
+              <div class="main">
+                <span class="icon el-icon-edit-outline"></span>
+                <span class="info-tips">文章</span>
+                <span class="count">64</span>
+              </div>
+              <div class="main">
+                <span class="icon hewieblog hewieview"></span>
+                <span class="info-tips">阅读</span>
+                <span class="count">60389</span>
+              </div>
             </div>
           </div>
           <div class="no-login" v-else>
@@ -343,6 +355,30 @@ export default {
 </script>
 
 <style>
+.user-info-list{
+  padding-left: 15px;
+  padding-bottom: 10px;
+  padding-right: 20px;
+  line-height: 40px;
+  font-size: 16px;
+  color: #646464;
+}
+
+.user-info-list .icon {
+  background: #e1efff;
+  padding: 8px;
+  border-radius: 50%;
+  color: #0084ff;
+}
+
+.user-info-list .info-tips {
+  margin-left: 10px;
+  margin-right: 4px;
+}
+
+.user-info-list .count {
+  color: #0084ff;
+}
 
 .main-list-item .labels-item a:hover{
   color: #37f !important;
@@ -605,10 +641,14 @@ export default {
   }
 
   .user-info-content{
-    text-align: center;
+
     width: 100%;
     background: #fcfcfc;
     position: relative;
+  }
+
+  .user-info-detail{
+    text-align: center;
   }
 
   .user-info-content .user-avatar{
