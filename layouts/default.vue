@@ -25,9 +25,9 @@
         </div>
         <div class="header-right-part">
           <div id="user-info-box" style="display: none" class="user-info-box float-left clear-fix">
-            <div class="header-user-avatar float-left">
+<!--            <div class="header-user-avatar float-left">
               <img v-if="userInfo !== null" style="object-fit: cover" :src="userInfo.avatar" />
-            </div>
+            </div>-->
             <div class="header-user-username float-right" v-if="userInfo !== null">
               <el-dropdown @command="handleCommand">
             <span  class="header-user-username-link">
@@ -442,4 +442,15 @@ export default {
     color: #93999f;
   }
 
+html::-webkit-scrollbar {
+  width: 8px;
+  height: 6px;
+}
+html::-webkit-scrollbar-thumb {
+  border-radius: 4px;
+  background-color: #cbcbcb;
+}
+html::-webkit-scrollbar-track-piece {
+  background: #eee;
+}
 </style>
