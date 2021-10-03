@@ -36,6 +36,22 @@ export const getTopArticles = () =>{
   }
 }
 
+export const getTopTenArticles = () =>{
+  if (process.client) {
+    return http.requestGet('/portal/article/top-ten');
+  } else {
+    return http.requestGet(baseUrl + '/portal/article/top-ten');
+  }
+}
+
+export const getLastTenArticles = () =>{
+  if (process.client) {
+    return http.requestGet('/portal/article/last-ten');
+  } else {
+    return http.requestGet(baseUrl + '/portal/article/last-ten');
+  }
+}
+
 export const getArticles = (categoryId, page, size) =>{
   if (categoryId !== '') {
     return http.requestGet('/portal/article/list/' + categoryId + '/' + page + '/' + size);
@@ -167,5 +183,14 @@ export const updateArticle = (article, articleId) => {
 export const deleteArticlePretend = (articleId) => {
   return http.requestDelete('/admin/article/state/' + articleId);
 }
+
+export const getArticleNumByUserId = (userId) => {
+  return http.requestGet('/portal/article/article/num/' + userId);
+}
+
+export const getViewNumByUserId = (userId) => {
+  return http.requestGet('/portal/article/view/num/' + userId);
+}
+
 
 

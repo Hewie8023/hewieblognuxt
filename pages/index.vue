@@ -4,7 +4,7 @@
       <div id="home-left-part">
         <div class="home-left-categories border-radius-default">
           <div :class="currentCategoryId===item.id?'home-left-item active':'home-left-item'" v-for="(item,index) in categories" :key="index">
-            <div><span v-text="item.name" @click="listArticleByCategoryId(item)"></span></div>
+            <div @click="listArticleByCategoryId(item)"><span v-text="item.name" ></span></div>
           </div>
         </div>
 <!--        <div id="scroll-top" title="回到顶部" class="scroll-top" style="display: block;">
@@ -145,12 +145,12 @@
               <div class="main">
                 <span class="icon el-icon-edit-outline"></span>
                 <span class="info-tips">文章</span>
-                <span class="count">64</span>
+                <span class="count">{{ articleNum }}</span>
               </div>
               <div class="main">
                 <span class="icon hewieblog hewieview"></span>
                 <span class="info-tips">阅读</span>
-                <span class="count">60389</span>
+                <span class="count">{{ viewNum }}</span>
               </div>
             </div>
           </div>
@@ -159,6 +159,24 @@
               登录以后您可以发表文章，评论，发表动态等。。。
             </div>
             <el-button @click="doLogin" class="login-btn" type="primary" size="mini">点我登录</el-button>
+          </div>
+        </div>
+        <div id="hot-article-card" class="right-card border-radius-default">
+          <div class="card-title">热门文章</div>
+          <div class="top-article-list" v-for="(item, index) in topTenArticles" :id="index">
+            <div class="top-ten-article-item clear-fix">
+              <div class="float-left">
+                <img  :src="'/portal/image/'+ item.cover" style="width: 60px; border-radius: 4px; height: 50px; background: rgb(240, 240, 240); object-fit: cover;"/>
+              </div>
+              <div class="hot-right-side float-left">
+                <a :href="'/article/'+item.id" target="_blank">{{item.title}}</a>
+                <div>
+                  <span>
+                    {{item.hewieUserNoPassword.userName}}
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
         <div id="tags-card" class="right-card border-radius-default">
@@ -191,6 +209,9 @@ export default {
       loading:false,
       currentCategoryId:'',
       loginUserInfo:'',
+      articleNum:'',
+      viewNum:'',
+      userId:''
     }
   },
   async asyncData(context) {
@@ -199,6 +220,7 @@ export default {
     let categoriesRes = await Api.getCategories();
     let loopsRes = await Api.getloops();
     let topArticleRes = await Api.getTopArticles();
+    let topTenArticleRes = await Api.getTopTenArticles();
     let articleRes = await Api.getArticles('', 1,30);
     let pageNavigation = {
       currentPage:articleRes.data.currentPage,
@@ -215,12 +237,27 @@ export default {
       pageNavigation: pageNavigation,
       articles:articleRes.data,
       topArticles:topArticleRes.data,
+      topTenArticles: topTenArticleRes.data.contents,
       loops:loopsRes.data,
       userInfo:userInfoRes.data,
       categories:tmpCategories
     }
   },
   methods:{
+    getUserArticleAndView(userId){
+      if (userId !== '') {
+        Api.getArticleNumByUserId(userId).then(result=>{
+          if (result.code === Api.success_code) {
+            this.articleNum = result.data;
+          }
+        });
+        Api.getViewNumByUserId(userId).then(result=>{
+          if (result.code === Api.success_code) {
+            this.viewNum = result.data;
+          }
+        })
+      }
+    },
     goUserInfoPage(){
       location.href = '/u/' + this.loginUserInfo.id
     },
@@ -292,8 +329,9 @@ export default {
       }
       //右边内容悬浮
       let tagsPart = document.getElementById('tags-card');
+      let hotPart = document.getElementById('hot-article-card');
       if (tagsPart) {
-        let bottomOfTags = tagsPart.offsetTop + tagsPart.offsetHeight;
+        let bottomOfTags = hotPart.offsetTop + hotPart.offsetHeight;
         if (scrolledTop >= bottomOfTags) {
           tagsPart.style.position = 'fixed';
           tagsPart.style.top = '20px';
@@ -330,6 +368,8 @@ export default {
       Api.checkToken().then(result=>{
         if (result.code === Api.success_code) {
           this.loginUserInfo = result.data;
+          this.userId = this.loginUserInfo.id;
+          this.getUserArticleAndView(this.userId);
           //console.log("userInfo===>"+this.loginUserInfo)
         }else {
           //console.log("userInfo=00==>"+this.loginUserInfo)
@@ -347,6 +387,7 @@ export default {
     window.onresize = function () {
       that.onWindowScroll();
     }
+
   },
   beforeDestroy() {
     window.removeEventListener('scroll', this.onWindowScroll);
@@ -570,7 +611,9 @@ export default {
     max-width: 480px;
     margin-bottom: 8px;
     margin-right: 20px;
-
+    white-space:nowrap;
+    text-overflow:ellipsis;
+    -webkit-text-overflow:ellipsis;
     overflow: hidden;
   }
 
@@ -632,6 +675,30 @@ export default {
     color: #7f828b;
     padding: 5px;
     border-bottom: #f4f4f4 solid 1px;
+  }
+
+  .top-ten-article-item a{
+    text-decoration: none;
+    color: #2b2b2b;
+    white-space:nowrap;
+    text-overflow:ellipsis;
+    -webkit-text-overflow:ellipsis;
+    overflow:hidden;
+    margin-bottom: 10px;
+  }
+  .top-ten-article-item .hot-right-side span{
+    color: #93999f;
+    font-size: 13px;
+  }
+  .top-ten-article-item .hot-right-side{
+    max-width: 100px;
+    margin-left: 5px;
+  }
+  .top-ten-article-item{
+    padding: 5px;
+
+    border-bottom: 1px solid #f4f4f4;
+
   }
 
   .right-card .tag-list-box{
