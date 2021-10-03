@@ -201,12 +201,30 @@
             <div class="main">
               <span class="icon el-icon-edit-outline"></span>
               <span class="info-tips">文章</span>
-              <span class="count">64</span>
+              <span class="count">{{ articleNum }}</span>
             </div>
             <div class="main">
               <span class="icon hewieblog hewieview"></span>
               <span class="info-tips">阅读</span>
-              <span class="count">60389</span>
+              <span class="count">{{ viewNum }}</span>
+            </div>
+          </div>
+        </div>
+        <div id="hot-article-card" class="right-card border-radius-default">
+          <div class="card-title">最新文章</div>
+          <div class="top-article-list" v-for="(item, index) in lastTenArticles" :id="index">
+            <div class="top-ten-article-item clear-fix">
+              <div class="float-left">
+                <img  :src="'/portal/image/'+ item.cover" style="width: 60px; border-radius: 4px; height: 50px; background: rgb(240, 240, 240); object-fit: cover;"/>
+              </div>
+              <div class="hot-right-side float-left">
+                <a :href="'/article/'+item.id" target="_blank">{{item.title}}</a>
+                <div>
+                  <span>
+                    {{item.hewieUserNoPassword.userName}}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -276,7 +294,8 @@ export default {
       isArticleProcessing:true,
       toUid:'',
       isCopy: false,
-
+      viewNum:'',
+      articleNum:''
     }
   },
   async asyncData({params}){
@@ -290,12 +309,14 @@ export default {
       labels+=',';
       labels+=label;
     })
+    let lastTenArticleRes = await Api.getLastTenArticles();
     return {
       article: articleRes.data,
       recommendArticles: recommendArticleRes.data,
       commentList:commentRes.data.commentContent,
       isLastPage: commentRes.data.last,
-      labelList: labels
+      labelList: labels,
+      lastTenArticles:lastTenArticleRes.data.contents
     }
   },
   mounted() {
@@ -316,7 +337,8 @@ export default {
       that.isArticleProcessing = false;
       clearInterval(timer)
     },500);
-
+    //console.log(this.article.userId)
+    this.getUserArticleAndView(this.article.userId)
     /*let e = document.querySelectorAll("code");
 
     let eLen = e.length;
@@ -431,6 +453,20 @@ export default {
         }
       })
     },
+    getUserArticleAndView(userId){
+      if (userId !== '') {
+        Api.getArticleNumByUserId(userId).then(result=>{
+          if (result.code === Api.success_code) {
+            this.articleNum = result.data;
+          }
+        });
+        Api.getViewNumByUserId(userId).then(result=>{
+          if (result.code === Api.success_code) {
+            this.viewNum = result.data;
+          }
+        })
+      }
+    },
     checkToken(){
       Api.checkToken().then(result=>{
         if (result.code === Api.success_code) {
@@ -461,9 +497,10 @@ export default {
     onWindowScroll() {
       let catalogBox = document.getElementById('article-category-list');
       let userInfoBox = document.getElementById('article-about-author');
+      let hotPart = document.getElementById('hot-article-card');
       let parentPart = document.getElementById('article-box');
       if (catalogBox) {
-        let bottomOfWC = userInfoBox.offsetTop + userInfoBox.offsetHeight;
+        let bottomOfWC = hotPart.offsetTop + hotPart.offsetHeight;
         let scrolledTop = document.documentElement.scrollTop;
         let scrolledLeft = document.documentElement.scrollLeft;
         if (scrolledTop >= bottomOfWC) {
@@ -1217,5 +1254,44 @@ export default {
 
 .user-info-list .count {
   color: #0084ff;
+}
+
+.right-card{
+  padding: 10px;
+  width: 100%;
+  margin-bottom: 20px;
+  background: #fff
+}
+
+.right-card .card-title{
+  font-size: 16px;
+  font-weight: 550;
+  color: #7f828b;
+  padding: 5px;
+  border-bottom: #f4f4f4 solid 1px;
+}
+
+.top-ten-article-item a{
+  text-decoration: none;
+  color: #2b2b2b;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+  -webkit-text-overflow:ellipsis;
+  overflow:hidden;
+  margin-bottom: 10px;
+}
+.top-ten-article-item .hot-right-side span{
+  color: #93999f;
+  font-size: 13px;
+}
+.top-ten-article-item .hot-right-side{
+  max-width: 100px;
+  margin-left: 5px;
+}
+.top-ten-article-item{
+  padding: 5px;
+
+  border-bottom: 1px solid #f4f4f4;
+
 }
 </style>
