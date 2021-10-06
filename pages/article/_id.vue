@@ -68,22 +68,42 @@
                 <img v-else class="comment-user-avatar" src="https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png"/>
               </div>
               <div class="comment-input-box float-left">
-                <el-input
-                  rows="4"
-                  type="textarea"
-                  placeholder="请输入评论内容"
-                  v-model="comment.content"
-                  maxlength="256"
-                  show-word-limit
-                  @focus="checkLogin"
-                >
-                </el-input>
+<!--                <el-input-->
+<!--                  rows="4"-->
+<!--                  type="textarea"-->
+<!--                  placeholder="请输入评论内容"-->
+<!--                  v-model="comment.content"-->
+<!--                  maxlength="256"-->
+<!--                  show-word-limit-->
+<!--                  @focus="checkLogin"-->
+<!--                >-->
+<!--                </el-input>-->
+                <RichTextInput
+                  @click.native="checkLogin"
+                  class="comment-rich-text-input"
+                  ref="richTextInput"
+                  v-model="inputContent">
+                </RichTextInput>
               </div>
 
             </div>
             <div class="comment-submit-btn">
-              <el-button type="primary" @click="doComment">发表评论</el-button>
+              <div>
+                <el-popover
+                  placement="top-start"
+                  width="415"
+                  trigger="click"
+                  >
+                  <div class="emoji-container">
+                    <EmojiPanel @emojiClick="onEmojiClick"></EmojiPanel>
+                  </div>
+                  <span class="hewieblog hewiebilibili-line emoji-trigger" slot="reference" ref="emojiTrigger">表情</span>
+                </el-popover>
+              </div>
+              <span class="content-post-btn" @click="doComment">发表评论</span>
             </div>
+
+
           </div>
           <div class="article-comment-list" id="article-comment-list">
             <div class="comment-part-title">评论列表</div>
@@ -99,7 +119,7 @@
 
                 <div class="comment-content-detail">
                   <div class="article-comment-content">
-                    {{item.firstcomment.content}}
+                    <div v-html="item.firstcomment.content"></div>
                   </div>
                   <div class="article-comment-action clear-fix">
                     <span class="comment-time float-left">{{item.firstcomment.createTime | formatDate('yyyy-MM-dd hh:mm')}}</span>
@@ -244,11 +264,15 @@
         <img :src="targetImagePath"/>
       </el-dialog>
     </div>
+
+
   </div>
 
 </template>
 
 <script>
+import RichTextInput from "../../components/RichTextInput";
+import EmojiPanel from "../../components/EmojiPanel";
 import * as Api from "../../api/api";
 import hljs from 'highlight.js';
 import 'highlight.js/styles/lioshi.css';
@@ -269,8 +293,13 @@ export default {
       ]
     }
   },
+  components:{
+    RichTextInput,
+    EmojiPanel
+  },
   data(){
     return {
+      inputContent:'',
       artileUrl:'',
       isImageDialogShow:false,
       targetImagePath:'',
@@ -320,6 +349,12 @@ export default {
     }
   },
   mounted() {
+    let emojiTrigger = this.$refs.emojiTrigger;
+    if (emojiTrigger) {
+      emojiTrigger.addEventListener("mousedown", function (event) {
+        return event.preventDefault()
+      })
+    }
     this.$store.commit("setCurrentActivityTab", "index");
     hljs.initHighlighting();
     this.handleContentImgs();
@@ -353,6 +388,20 @@ export default {
     window.removeEventListener('scroll', this.onWindowScroll);
   },
   methods:{
+    onEmojiClick(emojiUrl){
+      //如果输入框没有焦点
+      //需要自动获取
+      let inputBox = this.$refs.richTextInput
+      if (document.activeElement !== inputBox) {
+        //获取焦点
+        inputBox.requireFocus();
+      }
+
+      let imgTag = `<img src="${emojiUrl}" class="emoji">`;
+      document.execCommand('insertHTML', false, imgTag);
+
+    },
+
     scrollInToComment(){
       let commentBox = document.getElementById("article-comment-input");
       document.documentElement.scrollTo({
@@ -420,10 +469,11 @@ export default {
         location.href = '/login?redirect='+location.href;
         return;
       }
-      if (this.comment.content === '') {
+      if (this.inputContent === '') {
         this.$message.error('评论内容不能为空');
         return;
       }
+      this.comment.content = this.inputContent;
       this.comment.articleId = this.article.id;
       console.log(this.comment);
       Api.postComment(this.comment).then(result=>{
@@ -438,7 +488,7 @@ export default {
 
     },
     resetComment(){
-      this.comment.content = '';
+      this.inputContent = '';
       this.comment.parentContent = '';
       this.subComment = '';
       if(lastInputBox) {
@@ -549,6 +599,12 @@ export default {
 }
 </script>
 <style>
+
+.emoji-container{
+  width: 400px;
+  height: 300px;
+}
+
 .el-icon-warning-outline {
   color: #3377ff;
   font-weight: 600;
@@ -751,6 +807,12 @@ export default {
   font-size: 14px;
   color: #8a93a0;
 }
+.article-comment-content img{
+  width: 25px;
+  height: 25px;
+  vertical-align: middle!important;
+  margin: 2px;
+}
 .article-comment-content{
   line-height: 24px;
   max-width: 500px;
@@ -758,9 +820,13 @@ export default {
   padding-bottom: 10px;
   word-wrap: break-word;
   word-break: break-all;
-  color: #505050;
   font-size: 15px;
   overflow: hidden;
+  color: #909090;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  -webkit-box-orient: vertical;
 }
 
 .comment-content-detail {
@@ -813,10 +879,36 @@ export default {
   display: inline-block;
   vertical-align: middle;
 }
+.comment-submit-btn .content-post-btn:hover{
+  opacity: 0.8;
+}
+.comment-submit-btn .content-post-btn{
+  background: #409eff;
+  color: #FFFFFF;
+  border-radius: 4px;
+  margin-right: 10px;
+  cursor: pointer;
+  padding: 6px 18px;
+}
 
+.comment-submit-btn .emoji-trigger:hover{
+  opacity: 0.8;
+}
+.comment-submit-btn .emoji-trigger{
+  margin-left: 40px;
+  display: inline-block;
+}
+
+.comment-submit-btn span{
+  padding: 5px 20px;
+  margin-top: 10px;
+  cursor: pointer;
+  color: #afafaf;
+}
 .comment-submit-btn{
-  padding: 0 10px 0 20px;
-  text-align: right;
+  display: flex;
+  justify-content: space-between;
+  padding-bottom: 10px;
 }
 .comment-user-avatar{
   width: 40px;
@@ -828,11 +920,13 @@ export default {
 .comment-input-box{
   width: 680px;
 }
+.comment-rich-text-input{
+  width: 680px;
+}
 .comment-input{
   display: inline-block;
   width: 100%;
   margin-top: 20px;
-  margin-bottom: 20px;
 }
 .article-comment-input{
   margin-bottom: 20px;
